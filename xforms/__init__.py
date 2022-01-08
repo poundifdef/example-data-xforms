@@ -29,6 +29,10 @@ def reorder_columns(ds, columns):
     rc = ds[[o for o in columns if o in ds.columns] + [c for c in ds.columns if c not in columns]]
     return rc
 
+def rename_columns(ds, map):
+    rc = ds.rename(columns=map)
+    return rc
+
 def line(ds):
     # Ensure the default "index" column is not part of the plot\n'
     if type(ds.index) == pd.RangeIndex or type(ds.index) == pd.Int64Index:
