@@ -33,6 +33,11 @@ def rename_columns(ds, map):
     rc = ds.rename(columns=map)
     return rc
 
+def transpose(ds):
+    new_index = ds.columns[0]
+    rc = ds.set_index(new_index).transpose().reindex()
+    return rc
+
 def line(ds):
     # Ensure the default "index" column is not part of the plot\n'
     if type(ds.index) == pd.RangeIndex or type(ds.index) == pd.Int64Index:
