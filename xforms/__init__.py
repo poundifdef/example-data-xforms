@@ -172,8 +172,12 @@ def histogram_buckets():
 def filter():
     pass
 
-def sort():
-    pass
+def sort(ds, sort_columns, sort_directions):
+    rc = ds.sort_values(
+        sort_columns,
+        ascending=sort_directions
+    )
+    return rc
 
 def pivot():
     pass
