@@ -210,17 +210,40 @@ def line(ds):
     # Display chart
     plt.show()
 
-def bar():
-    pass
+def bar(ds):
+    # Ensure the default "index" column is not part of the plot
+    if type(ds.index) == pd.RangeIndex or type(ds.index) == pd.Int64Index:
+        index_column = ds.columns[0]
+        ds = ds.set_index(index_column)
+    
+    # Configure chart display
+    fig, ax = plt.subplots()
+    ax.yaxis.set_major_formatter(number_formatter)
+    ds.plot.bar(ax=ax)
+
+    # Rotate x axis labels 45 degrees
+    fig.autofmt_xdate()
+
+    # Increase chart size
+    fig.set_size_inches(12, 8)
+
+    # Display chart
+    plt.show()
 
 def single_value(ds):
     print(ds.iloc[0, 0])
 
-def pie():
-    pass
+def pie(ds):
+    y_column = ds.columns[1]
+    ds.plot.pie(y=y_column)
+    plt.show()
 
-def area():
-    pass
+def area(ds):
+    ds.plot.area()
+    plt.show()
 
-def bar_line():
-    pass
+def bar_line(ds):
+    # TODO: change stacked according to settings
+    ds[ds.columns[1:-1]].plot.bar(stacked=True)
+    ds[ds.columns[-1]].plot(kind="line", secondary_y=True)
+    plt.show()
