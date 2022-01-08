@@ -23,6 +23,21 @@ def divide(ds, new_col, dividend, divisor):
 def column_ratio(ds, new_col, dividend, divisor):
     return divide(ds, new_col, dividend, divisor)
 
+def add(ds, new_col, addend_1, addend_2):
+    rc = ds
+    rc[new_col] = ds[addend_1] + ds[addend_2]
+    return rc
+
+def subtract(ds, new_col, minuend, subtrahend):
+    rc = ds
+    rc[new_col] = ds[minuend] - ds[subtrahend]
+    return rc
+
+def multiply(ds, new_col, multiplicand_1, multiplicand_2):
+    rc = ds
+    rc[new_col] = ds[multiplicand_1] * ds[multiplicand_2]
+    return rc
+
 def remove_columns(ds, columns):
     cols_to_drop = [c for c in columns if c in ds]
     rc = ds.drop(columns=cols_to_drop, errors='ignore')
