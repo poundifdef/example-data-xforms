@@ -20,6 +20,9 @@ def divide(ds, new_col, dividend, divisor):
     rc[new_col] = ds[dividend] / ds[divisor]
     return rc
 
+def column_ratio(ds, new_col, dividend, divisor):
+    return divide(ds, new_col, dividend, divisor)
+
 def remove_columns(ds, columns):
     cols_to_drop = [c for c in columns if c in ds]
     rc = ds.drop(columns=cols_to_drop, errors='ignore')
