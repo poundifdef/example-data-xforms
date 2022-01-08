@@ -1,6 +1,16 @@
 import numpy
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+
+def format(x, pos):
+    m = 0
+    while abs(x) >= 1000:
+        m += 1
+        x = x/1000.0
+    return "%.2f%s" % (x, ["", "K", "M", "B", "T"][m])
+
+number_formatter = FuncFormatter(format)
 
 def hello():
     return "hello"
