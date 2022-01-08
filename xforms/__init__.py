@@ -166,8 +166,22 @@ def reorder_columns(ds, columns):
 def group_by():
     pass
 
-def histogram_buckets():
-    pass
+def histogram_buckets(ds, col, aggregation, bucket_type, custom_buckets):
+    if aggregation != 'COUNT':
+        raise Exception('We only support COUNT aggregations in histograms')
+        
+    if bucket_type != 'custom_buckets':
+        raise Exception('We only support custom_buckets in histograms')
+    
+    bins = pd.IntervalIndex.from_breaks(custom_buckets)
+    binned = pd.cut(ds[col], bins=bins)
+    binned = binned.cat.rename_categories(lambda r: f'{r.left}-{r.right - 1}')
+    rc = binned.groupby(binned).size().to_frame().rename_axis(0).reset_index()
+    columns = {}
+    columns[col] = 'Bucket'
+    columns[0] = 'Count'
+    rc.rename(columns, inplace=True)
+    return rc
 
 def filter():
     pass
