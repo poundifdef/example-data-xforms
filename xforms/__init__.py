@@ -12,55 +12,52 @@ def format(x, pos):
 
 number_formatter = FuncFormatter(format)
 
-def hello():
-    return "hello"
-
-def divide(ds, new_col, dividend, divisor):
-    rc = ds
-    rc[new_col] = ds[dividend] / ds[divisor]
-    return rc
-
-def column_ratio(ds, new_col, dividend, divisor):
+def column_ratio_new(ds, new_col, dividend, divisor):
     return divide(ds, new_col, dividend, divisor)
 
-def add(ds, new_col, addend_1, addend_2):
-    rc = ds
-    rc[new_col] = ds[addend_1] + ds[addend_2]
-    return rc
-
-def subtract(ds, new_col, minuend, subtrahend):
+def subtract_new(ds, new_col, minuend, subtrahend):
     rc = ds
     rc[new_col] = ds[minuend] - ds[subtrahend]
     return rc
 
-def multiply(ds, new_col, multiplicand_1, multiplicand_2):
+def multiply_new(ds, new_col, multiplicand_1, multiplicand_2):
     rc = ds
     rc[new_col] = ds[multiplicand_1] * ds[multiplicand_2]
     return rc
 
-def total_column_sum(ds, new_col):
+def add_new(ds, new_col, addend_1, addend_2):
+    rc = ds
+    rc[new_col] = ds[addend_1] + ds[addend_2]
+    return rc
+
+def divide_new(ds, new_col, dividend, divisor):
+    rc = ds
+    rc[new_col] = ds[dividend] / ds[divisor]
+    return rc
+
+def total_column_sum_new(ds, new_col):
     rc = ds
     rc[new_col] = ds.sum(axis=1)
     return rc
 
-def aggregation(ds, new_col, source, operation):
+def aggregation_new(ds, new_col, source, operation):
     if operation != 'sum':
         raise Exception(f'Aggregating with {operation} is not supported')
     rc = ds
     rc[new_col] = ds[source].sum()
     return rc
 
-def running_total(ds, new_col, source):
+def running_total_new(ds, new_col, source):
     rc = ds
     rc[new_col] = ds[source].cumsum()
     return rc
 
-def ratio_of_total(ds, new_col, source):
+def ratio_of_total_new(ds, new_col, source):
     rc = ds
     rc[new_col] = ds[source] / ds[source].sum()
     return rc
 
-def datediff(ds, new_col, start, end, increment):
+def datediff_new(ds, new_col, start, end, increment):
     if increment == 'day': inc = 'D'
     elif increment == 'week': inc = 'W'
     elif increment == 'month': inc = 'M'
@@ -72,15 +69,27 @@ def datediff(ds, new_col, start, end, increment):
     rc[new_col] = rc[new_col].apply(numpy.floor)
     return rc
 
-def substr(ds, new_col, source, start=None, end=None):
+def substr_new(ds, new_col, source, start=None, end=None):
     rc = ds
     rc[new_col] = ds[source].str[start:end]
     return rc
 
-def custom(ds, new_col, function):
+def custom_new(ds, new_col, function):
     rc = ds
     rc[new_col] = ds.apply(function, axis=1, result_type='reduce')
     return rc
+
+def case_statement_new(ds, new_col):
+    pass
+
+def add(ds, col, addend):
+    return add_new(ds, col, col, addend)
+
+def multiply(ds, col, multiplicand):
+    return multiply_new(ds, col, col, multiplicand)
+
+def divide(ds, col, divisor):
+    return divide_new(ds, col, col, divisor)
 
 def remove_columns(ds, columns):
     cols_to_drop = [c for c in columns if c in ds]
