@@ -178,14 +178,37 @@ def sort():
 def pivot():
     pass
 
-def full_outer_join():
-    pass
+def _join(join_type, datasets, join_on_first_n_columns):
+    rc = datasets[0]
 
-def inner_join():
-    pass
+    for i in range(1, len(datasets)):
+        left_data = rc
+        right_data = datasets[i]
 
-def left_join():
-    pass
+        # Rename join columns on right-hand dataset to match left-hand names
+        renamed_columns = {}
+        for col_num in range(0, join_on_first_n_columns): 
+            renamed_columns[right_data.columns[col_num]] = left_data.columns[col_num]
+        right_data_renamed = right_data.rename(columns=renamed_columns)
+
+        rc = left_data.merge(
+            right_data_renamed,
+            how=join_type,
+            left_on=list(left_data.columns[:join_on_first_n_columns]),
+            right_on=list(right_data_renamed.columns[:join_on_first_n_columns]),
+            suffixes=(None, ':1')
+        )
+
+    return rc
+
+def full_outer_join(datasets, join_on_first_n_columns):
+    return _join('outer', datasets, join_on_first_n_columns)
+
+def inner_join(datasets, join_on_first_n_columns):
+    return _join('inner', datasets, join_on_first_n_columns)
+
+def left_join(datasets, join_on_first_n_columns):
+    return _join('left', datasets, join_on_first_n_columns)
 
 def table():
     pass
