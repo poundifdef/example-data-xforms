@@ -96,11 +96,13 @@ def multiply(ds, col, multiplicand):
 def divide(ds, col, divisor):
     return divide_new(ds, col, col, divisor)
 
-def round():
-    pass
+def round(ds, col, places):
+    rc = ds
+    rc[col] = ds[col].round(places)
+    return rc
 
-def substr():
-    pass
+def substr(ds, col, start=None, end=None):
+    return substr_new(ds, col, col, start, end)
 
 def format():
     pass
