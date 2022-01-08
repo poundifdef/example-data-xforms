@@ -50,6 +50,28 @@ def aggregation(ds, new_col, source, operation):
     rc[new_col] = ds[source].sum()
     return rc
 
+def running_total(ds, new_col, source):
+    rc = ds
+    rc[new_col] = ds[source].cumsum()
+    return rc
+
+def ratio_of_total(ds, new_col, source):
+    rc = ds
+    rc[new_col] = ds[source] / ds[source].sum()
+    return rc
+
+def datediff(ds, new_col, end, beginning, increment):
+    if increment == 'day': inc = 'D'
+    elif increment == 'week': inc = 'W'
+    elif increment == 'month': inc = 'M'
+    elif increment == 'year': inc = 'Y'
+
+    rc = ds
+    rc[new_col] = rc[end] - rc[beginning]
+    rc[new_col] = rc[new_col] / numpy.timedelta64(1, inc)
+    rc[new_col] = rc[new_col].apply(numpy.floor)
+    return rc
+
 def remove_columns(ds, columns):
     cols_to_drop = [c for c in columns if c in ds]
     rc = ds.drop(columns=cols_to_drop, errors='ignore')
