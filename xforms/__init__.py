@@ -60,16 +60,26 @@ def ratio_of_total(ds, new_col, source):
     rc[new_col] = ds[source] / ds[source].sum()
     return rc
 
-def datediff(ds, new_col, end, beginning, increment):
+def datediff(ds, new_col, start, end, increment):
     if increment == 'day': inc = 'D'
     elif increment == 'week': inc = 'W'
     elif increment == 'month': inc = 'M'
     elif increment == 'year': inc = 'Y'
 
     rc = ds
-    rc[new_col] = rc[end] - rc[beginning]
+    rc[new_col] = rc[end] - rc[start]
     rc[new_col] = rc[new_col] / numpy.timedelta64(1, inc)
     rc[new_col] = rc[new_col].apply(numpy.floor)
+    return rc
+
+def substr(ds, new_col, source, start=None, end=None):
+    rc = ds
+    rc[new_col] = ds[source].str[start:end]
+    return rc
+
+def custom(ds, new_col, function):
+    rc = ds
+    rc[new_col] = ds.apply(function, axis=1, result_type='reduce')
     return rc
 
 def remove_columns(ds, columns):
