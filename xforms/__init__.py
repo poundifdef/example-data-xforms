@@ -141,8 +141,11 @@ def combine_columns(ds, new_col, columns, separator=',', operator='concatenate',
 
     return rc
 
-def unpivot():
-    pass
+# use_three_columns is not implemented
+def unpivot(ds, group_alias, values_alias):
+    rc = ds.transpose().reset_index()
+    rc.rename(columns={'index': group_alias, 0: values_alias}, inplace=True)
+    return rc
 
 def zero_fill():
     pass
