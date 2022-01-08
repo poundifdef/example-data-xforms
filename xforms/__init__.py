@@ -12,6 +12,11 @@ def format(x, pos):
 
 number_formatter = FuncFormatter(format)
 
+def transpose(ds):
+    new_index = ds.columns[0]
+    rc = ds.set_index(new_index).transpose().reindex()
+    return rc
+
 def column_ratio_new(ds, new_col, dividend, divisor):
     return divide(ds, new_col, dividend, divisor)
 
@@ -91,6 +96,31 @@ def multiply(ds, col, multiplicand):
 def divide(ds, col, divisor):
     return divide_new(ds, col, col, divisor)
 
+def round():
+    pass
+
+def substr():
+    pass
+
+def format():
+    pass
+
+def custom():
+    pass
+
+def combine_columns():
+    pass
+
+def unpivot():
+    pass
+
+def zero_fill():
+    pass
+
+def rename_columns(ds, map):
+    rc = ds.rename(columns=map)
+    return rc
+
 def remove_columns(ds, columns):
     cols_to_drop = [c for c in columns if c in ds]
     rc = ds.drop(columns=cols_to_drop, errors='ignore')
@@ -100,14 +130,32 @@ def reorder_columns(ds, columns):
     rc = ds[[o for o in columns if o in ds.columns] + [c for c in ds.columns if c not in columns]]
     return rc
 
-def rename_columns(ds, map):
-    rc = ds.rename(columns=map)
-    return rc
+def group_by():
+    pass
 
-def transpose(ds):
-    new_index = ds.columns[0]
-    rc = ds.set_index(new_index).transpose().reindex()
-    return rc
+def histogram_buckets():
+    pass
+
+def filter():
+    pass
+
+def sort():
+    pass
+
+def pivot():
+    pass
+
+def full_outer_join():
+    pass
+
+def inner_join():
+    pass
+
+def left_join():
+    pass
+
+def table():
+    pass
 
 def line(ds):
     # Ensure the default "index" column is not part of the plot\n'
@@ -128,3 +176,18 @@ def line(ds):
 
     # Display chart
     plt.show()
+
+def bar():
+    pass
+
+def single_value(ds):
+    print(ds.iloc[0, 0])
+
+def pie():
+    pass
+
+def area():
+    pass
+
+def bar_line():
+    pass
