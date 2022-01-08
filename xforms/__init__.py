@@ -38,6 +38,18 @@ def multiply(ds, new_col, multiplicand_1, multiplicand_2):
     rc[new_col] = ds[multiplicand_1] * ds[multiplicand_2]
     return rc
 
+def total_column_sum(ds, new_col):
+    rc = ds
+    rc[new_col] = ds.sum(axis=1)
+    return rc
+
+def aggregation(ds, new_col, source, operation):
+    if operation != 'sum':
+        raise Exception(f'Aggregating with {operation} is not supported')
+    rc = ds
+    rc[new_col] = ds[source].sum()
+    return rc
+
 def remove_columns(ds, columns):
     cols_to_drop = [c for c in columns if c in ds]
     rc = ds.drop(columns=cols_to_drop, errors='ignore')
