@@ -2,71 +2,89 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
+import plotly.graph_objects as go
+
 
 def format(x, pos):
     m = 0
     while abs(x) >= 1000:
         m += 1
-        x = x/1000.0
+        x = x / 1000.0
     return "%.2f%s" % (x, ["", "K", "M", "B", "T"][m])
 
+
 number_formatter = FuncFormatter(format)
+
 
 def transpose(ds):
     new_index = ds.columns[0]
     rc = ds.set_index(new_index).transpose().reindex()
     return rc
 
+
 def column_ratio_new(ds, new_col, dividend, divisor):
     return divide(ds, new_col, dividend, divisor)
+
 
 def subtract_new(ds, new_col, minuend, subtrahend):
     rc = ds
     rc[new_col] = ds[minuend] - ds[subtrahend]
     return rc
 
+
 def multiply_new(ds, new_col, multiplicand_1, multiplicand_2):
     rc = ds
     rc[new_col] = ds[multiplicand_1] * ds[multiplicand_2]
     return rc
+
 
 def add_new(ds, new_col, addend_1, addend_2):
     rc = ds
     rc[new_col] = ds[addend_1] + ds[addend_2]
     return rc
 
+
 def divide_new(ds, new_col, dividend, divisor):
     rc = ds
     rc[new_col] = ds[dividend] / ds[divisor]
     return rc
+
 
 def total_column_sum_new(ds, new_col):
     rc = ds
     rc[new_col] = ds.sum(axis=1)
     return rc
 
+
 def aggregation_new(ds, new_col, source, operation):
-    if operation != 'sum':
-        raise Exception(f'Aggregating with {operation} is not supported')
+    if operation != "sum":
+        raise Exception(f"Aggregating with {operation} is not supported")
     rc = ds
     rc[new_col] = ds[source].sum()
     return rc
+
 
 def running_total_new(ds, new_col, source):
     rc = ds
     rc[new_col] = ds[source].cumsum()
     return rc
 
+
 def ratio_of_total_new(ds, new_col, source):
     rc = ds
     rc[new_col] = ds[source] / ds[source].sum()
     return rc
 
+
 def datediff_new(ds, new_col, start, end, increment):
-    if increment == 'day': inc = 'D'
-    elif increment == 'week': inc = 'W'
-    elif increment == 'month': inc = 'M'
-    elif increment == 'year': inc = 'Y'
+    if increment == "day":
+        inc = "D"
+    elif increment == "week":
+        inc = "W"
+    elif increment == "month":
+        inc = "M"
+    elif increment == "year":
+        inc = "Y"
 
     rc = ds
     rc[new_col] = rc[end] - rc[start]
@@ -74,128 +92,145 @@ def datediff_new(ds, new_col, start, end, increment):
     rc[new_col] = rc[new_col].apply(np.floor)
     return rc
 
+
 def substr_new(ds, new_col, source, start=None, end=None):
     rc = ds
     rc[new_col] = ds[source].str[start:end]
     return rc
 
+
 def custom_new(ds, new_col, function):
     rc = ds
-    rc[new_col] = ds.apply(function, axis=1, result_type='reduce')
+    rc[new_col] = ds.apply(function, axis=1, result_type="reduce")
     return rc
 
-def case_statement_new(ds, new_col, source, conditions, default, default_type='LITERAL'):
+
+def case_statement_new(
+    ds, new_col, source, conditions, default, default_type="LITERAL"
+):
     rc = ds
 
-    if default_type == 'COLUMN':
+    if default_type == "COLUMN":
         rc[new_col] = rc[default]
     else:
         rc[new_col] = default
-    
-    for condition in conditions:
-        value = condition['value']
-        value_type = condition['value_type']
-        operand = condition['operand']
-        operator = condition['operator']
 
-        if value_type == 'COLUMN':
+    for condition in conditions:
+        value = condition["value"]
+        value_type = condition["value_type"]
+        operand = condition["operand"]
+        operator = condition["operator"]
+
+        if value_type == "COLUMN":
             value = rc[value]
 
         # determine the operand type
-        
-        if operator == 'LIKE':
+
+        if operator == "LIKE":
             # None of the LIKE operators in the data have percent signs
-            operator = '='
-        
+            operator = "="
+
         # the data doesn't contain NOT LIKE
 
         # TODO: determine whether values should be compared using int or str
 
-        if operator in ['=', '!=', '>', '>=', '<', '<=']:
+        if operator in ["=", "!=", ">", ">=", "<", "<="]:
             fn = {
-                '=': 'eq',
-                '!=': 'ne',
-                '>': 'gt',
-                '>=': 'ge',
-                '<': 'lt',
-                '<=': 'le',
+                "=": "eq",
+                "!=": "ne",
+                ">": "gt",
+                ">=": "ge",
+                "<": "lt",
+                "<=": "le",
             }
             f = getattr(rc[source], fn[operator])
             rc.loc[f(operand), new_col] = value
-        
-        elif operator == 'IS NOT' and operand == 'null':
+
+        elif operator == "IS NOT" and operand == "null":
             rc.loc[pd.notnull(rc[source]), new_col] = value
-        
-        elif operator == 'IS' and operand == 'null':
+
+        elif operator == "IS" and operand == "null":
             rc.loc[pd.isnull(rc[source]), new_col] = value
-        
-        elif operator == 'IS' and operand == "''":
-            rc.loc[rc[source] == '', new_col] = value
+
+        elif operator == "IS" and operand == "''":
+            rc.loc[rc[source] == "", new_col] = value
 
         else:
-            raise Exception(f'{operator} is not supported')
+            raise Exception(f"{operator} is not supported")
 
     return rc
+
 
 def add(ds, col, addend):
     return add_new(ds, col, col, addend)
 
+
 def multiply(ds, col, multiplicand):
     return multiply_new(ds, col, col, multiplicand)
 
+
 def divide(ds, col, divisor):
     return divide_new(ds, col, col, divisor)
+
 
 def round(ds, col, places):
     rc = ds
     rc[col] = ds[col].round(places)
     return rc
 
+
 def substr(ds, col, start=None, end=None):
     return substr_new(ds, col, col, start, end)
 
+
 def format(ds, col, arg):
     if arg != 0:
-        raise Exception(f'edit_column_format does not work for non-zero args {arg}')
+        raise Exception(f"edit_column_format does not work for non-zero args {arg}")
     rc = ds
     rc[col] = ds[col].apply(np.floor)
     return rc
 
+
 def custom(ds, col, function):
     return custom_new(ds, col, function)
 
-def combine_columns(ds, new_col, columns, separator=',', operator='concatenate', hide_columns=False):
+
+def combine_columns(
+    ds, new_col, columns, separator=",", operator="concatenate", hide_columns=False
+):
     rc = ds
 
-    if operator == 'concatenate':
+    if operator == "concatenate":
         for col in columns:
             rc[col] = rc[col].astype(str)
         rc[new_col] = rc[columns].agg(separator.join, axis=1)
-    
-    elif operator in ('add', 'subtract', 'multiply'):
+
+    elif operator in ("add", "subtract", "multiply"):
         cols = [ds[col] for col in columns]
         rc[new_col] = cols[0]
         for col in cols[1:]:
-            if operator == 'add':
+            if operator == "add":
                 rc[new_col] = rc[new_col].add(col)
-            elif operator == 'subtract':
+            elif operator == "subtract":
                 rc[new_col] = rc[new_col].sub(col)
-            elif operator == 'multiply':
+            elif operator == "multiply":
                 rc[new_col] = rc[new_col].multiply(col)
 
     else:
-        raise Exception(operator + ' is unsupported')
+        raise Exception(operator + " is unsupported")
 
     if hide_columns:
-        rc = ds.drop(columns, errors='ignore')
+        rc = ds.drop(columns, errors="ignore")
 
     return rc
+
 
 # use_three_columns is not implemented
 def unpivot(ds, group_alias, values_alias):
     rc = ds.transpose().reset_index()
-    rc.rename(columns={'index': group_alias, 0: values_alias}, inplace=True)
+    rc.rename(columns={"index": group_alias, 0: values_alias}, inplace=True)
     return rc
+
 
 def zero_fill(ds, column_types):
     rc = ds
@@ -203,42 +238,49 @@ def zero_fill(ds, column_types):
     col_1_name = ds.columns[0]
     col_1_type = column_types[col_1_name]
 
-    if col_1_type in ('text', 'real'):
+    if col_1_type in ("text", "real"):
         # Do nothing for this zero_fill since the
         # first column is a string or real number
         pass
 
-    elif col_1_type == 'date':
+    elif col_1_type == "date":
         # Do something for this zero_fill since the first column is a date
         col_1 = rc[col_1_name]
-        date_range = pd.date_range(col_1.min(), col_1.max(), freq='d')
+        date_range = pd.date_range(col_1.min(), col_1.max(), freq="d")
         diff = date_range.difference(col_1).to_frame()
         diff.rename(columns={0: col_1_name}, inplace=True)
         rc = rc.append(diff, ignore_index=True)
         rc = rc.sort_values(col_1_name)
 
     else:
-        raise Exception('unsupported zero_fill column type ' + col_1_type)
+        raise Exception("unsupported zero_fill column type " + col_1_type)
 
     for col_name in ds.columns:
         type = column_types.get(col_name)
-        if type in ('integer', 'real'):
+        if type in ("integer", "real"):
             rc[col_name].fillna(0, inplace=True)
 
     return rc
+
 
 def rename_columns(ds, map):
     rc = ds.rename(columns=map)
     return rc
 
+
 def remove_columns(ds, columns):
     cols_to_drop = [c for c in columns if c in ds]
-    rc = ds.drop(columns=cols_to_drop, errors='ignore')
+    rc = ds.drop(columns=cols_to_drop, errors="ignore")
     return rc
 
+
 def reorder_columns(ds, columns):
-    rc = ds[[o for o in columns if o in ds.columns] + [c for c in ds.columns if c not in columns]]
+    rc = ds[
+        [o for o in columns if o in ds.columns]
+        + [c for c in ds.columns if c not in columns]
+    ]
     return rc
+
 
 def group_by(ds, columns):
     ordered = ds.columns
@@ -250,20 +292,27 @@ def group_by(ds, columns):
     rename = {}
 
     for name, action in columns.items():
-        if action == 'COUNT_DISTINCT':
-            rename[name] = f'COUNT(DISTINCT {name})'
+        if action == "COUNT_DISTINCT":
+            rename[name] = f"COUNT(DISTINCT {name})"
         else:
-            rename[name] = f'{action}({name})'
-        
-        if action == 'MIN': method = 'min'
-        elif action == 'MAX': method = 'max'
-        elif action == 'MEDIAN': method = 'median'
-        elif action == 'AVG': method = 'mean'
-        elif action == 'COUNT': method = 'count'
-        elif action == 'SUM': method = 'sum'
-        elif action == 'COUNT_DISTINCT': method = 'nunique'
-        elif action == 'GROUP_CONCAT':
-            agg[name] = lambda x: ', '.join(x)
+            rename[name] = f"{action}({name})"
+
+        if action == "MIN":
+            method = "min"
+        elif action == "MAX":
+            method = "max"
+        elif action == "MEDIAN":
+            method = "median"
+        elif action == "AVG":
+            method = "mean"
+        elif action == "COUNT":
+            method = "count"
+        elif action == "SUM":
+            method = "sum"
+        elif action == "COUNT_DISTINCT":
+            method = "nunique"
+        elif action == "GROUP_CONCAT":
+            agg[name] = lambda x: ", ".join(x)
             continue
         agg[name] = method
 
@@ -273,22 +322,24 @@ def group_by(ds, columns):
 
     return rc
 
+
 def histogram_buckets(ds, col, aggregation, bucket_type, custom_buckets):
-    if aggregation != 'COUNT':
-        raise Exception('We only support COUNT aggregations in histograms')
-        
-    if bucket_type != 'custom_buckets':
-        raise Exception('We only support custom_buckets in histograms')
-    
+    if aggregation != "COUNT":
+        raise Exception("We only support COUNT aggregations in histograms")
+
+    if bucket_type != "custom_buckets":
+        raise Exception("We only support custom_buckets in histograms")
+
     bins = pd.IntervalIndex.from_breaks(custom_buckets)
     binned = pd.cut(ds[col], bins=bins)
-    binned = binned.cat.rename_categories(lambda r: f'{r.left}-{r.right - 1}')
+    binned = binned.cat.rename_categories(lambda r: f"{r.left}-{r.right - 1}")
     rc = binned.groupby(binned).size().to_frame().rename_axis(0).reset_index()
     columns = {}
-    columns[col] = 'Bucket'
-    columns[0] = 'Count'
+    columns[col] = "Bucket"
+    columns[0] = "Count"
     rc.rename(columns, inplace=True)
     return rc
+
 
 def filter(ds, filters, match_type='all', mode='include'):
     # filter definition
@@ -350,15 +401,15 @@ def filter(ds, filters, match_type='all', mode='include'):
     
     return rc
 
+
 def sort(ds, sort_columns, sort_directions):
-    rc = ds.sort_values(
-        sort_columns,
-        ascending=sort_directions
-    )
+    rc = ds.sort_values(sort_columns, ascending=sort_directions)
     return rc
+
 
 def pivot():
     pass
+
 
 def _join(join_type, datasets, join_on_first_n_columns):
     rc = datasets[0]
@@ -369,7 +420,7 @@ def _join(join_type, datasets, join_on_first_n_columns):
 
         # Rename join columns on right-hand dataset to match left-hand names
         renamed_columns = {}
-        for col_num in range(0, join_on_first_n_columns): 
+        for col_num in range(0, join_on_first_n_columns):
             renamed_columns[right_data.columns[col_num]] = left_data.columns[col_num]
         right_data_renamed = right_data.rename(columns=renamed_columns)
 
@@ -378,22 +429,80 @@ def _join(join_type, datasets, join_on_first_n_columns):
             how=join_type,
             left_on=list(left_data.columns[:join_on_first_n_columns]),
             right_on=list(right_data_renamed.columns[:join_on_first_n_columns]),
-            suffixes=(None, ':1')
+            suffixes=(None, ":1"),
         )
 
     return rc
 
+
 def full_outer_join(datasets, join_on_first_n_columns):
-    return _join('outer', datasets, join_on_first_n_columns)
+    return _join("outer", datasets, join_on_first_n_columns)
+
 
 def inner_join(datasets, join_on_first_n_columns):
-    return _join('inner', datasets, join_on_first_n_columns)
+    return _join("inner", datasets, join_on_first_n_columns)
+
 
 def left_join(datasets, join_on_first_n_columns):
-    return _join('left', datasets, join_on_first_n_columns)
+    return _join("left", datasets, join_on_first_n_columns)
 
-def table():
-    pass
+
+def table(ds, column_types: dict = None, column_precision: dict = None):
+    """
+    Displays a table of data.
+
+    ds: Dataset to display
+
+    column_types: dict of the type of each column, where the key is the column
+                  name and the value is the type. Types can be:
+
+                    - percentage
+                    - integer
+                    - currency
+
+    column_precision: Precision of each column. Key is the column name and
+                        the value is the number of decimal places.
+    """
+
+    # Formatting is done using d3 format specifiers:
+    # https://github.com/d3/d3-format/blob/main/README.md
+
+    column_types = column_types or {}
+    column_precision = column_precision or {}
+    formats = []
+
+    for col_name in ds.columns:
+
+        col_type = column_types.get(col_name)
+        precision = column_precision.get(col_name)
+
+        if col_type == "percentage":
+            precision = precision or 0
+            formats.append(f",.{precision}%")
+        elif col_type == "integer":
+            formats.append(",.0f")
+        elif col_type == "currency":
+            precision = precision or 2
+            formats.append(f"$,.{precision}f")
+        elif col_type == "real":
+            precision = precision or 2
+            formats.append(f",.{precision}f")
+        else:
+            formats.append(None)
+
+    fig = go.Figure(
+        data=[
+            go.Table(
+                header=dict(values=list(ds.columns), align="left"),
+                cells=dict(
+                    values=[ds[c] for c in ds.columns], format=formats, align="left"
+                ),
+            )
+        ]
+    )
+
+    fig.show()
+
 
 def line(ds):
     # Ensure the default "index" column is not part of the plo'
@@ -415,12 +524,13 @@ def line(ds):
     # Display chart
     plt.show()
 
+
 def bar(ds):
     # Ensure the default "index" column is not part of the plot
     if type(ds.index) == pd.RangeIndex or type(ds.index) == pd.Int64Index:
         index_column = ds.columns[0]
         ds = ds.set_index(index_column)
-    
+
     # Configure chart display
     fig, ax = plt.subplots()
     ax.yaxis.set_major_formatter(number_formatter)
@@ -435,17 +545,21 @@ def bar(ds):
     # Display chart
     plt.show()
 
+
 def single_value(ds):
     print(ds.iloc[0, 0])
+
 
 def pie(ds):
     y_column = ds.columns[1]
     ds.plot.pie(y=y_column)
     plt.show()
 
+
 def area(ds):
     ds.plot.area()
     plt.show()
+
 
 def bar_line(ds):
     # TODO: change stacked according to settings
