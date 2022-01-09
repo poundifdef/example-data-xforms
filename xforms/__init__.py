@@ -390,26 +390,46 @@ def left_join(datasets, join_on_first_n_columns):
     return _join("left", datasets, join_on_first_n_columns)
 
 
-def table(ds, column_types: dict = None):
+def table(ds, column_types: dict = None, column_precision: dict = None):
     """
     Displays a table of data.
+
+    ds: Dataset to display
+
+    column_types: dict of the type of each column, where the key is the column
+                  name and the value is the type. Types can be:
+
+                    - percentage
+                    - integer
+                    - currency
+    
+    column_precision: Precision of each column. Key is the column name and
+                        the value is the number of decimal places.
     """
 
     # Formatting is done using d3 format specifiers:
     # https://github.com/d3/d3-format/blob/main/README.md
 
     column_types = column_types or {}
+    column_precision = column_precision or {}
     formats = []
 
     for col_name in ds.columns:
 
         col_type = column_types.get(col_name)
+        precision = column_precision(col_name)
+
         if col_type == "percentage":
-            formats.append(",%")
+            precision = precision or 0
+            formats.append(f",.{precision}f%")
         elif col_type == "integer":
-            formats.append(",")
+            formats.append(",.0f")
         elif col_type == "currency":
-            formats.append("$,.2f")
+            precision = precision or 2
+            formats.append(f"$,.{precision}f")
+        elif col_type == "real":
+            precision = precision or 2
+            formats.append(f"$,.{precision}f")
         else:
             formats.append(None)
 
