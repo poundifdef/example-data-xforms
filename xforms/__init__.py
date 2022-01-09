@@ -559,11 +559,19 @@ def line(ds):
 
 
 def bar(ds, stacked=False):
+    """
+    Generate a bar chart from dataset. Assumes first column
+    is the x axis. Any subsequent columns are new datasets.
+
+    stacked: Display bars stacked on top of each other rather than
+             side by side
+    """
+
     barmode = "group"
     if stacked:
         barmode = "stacked"
 
-    fig = px.bar(ds, x=ds.columns[0], y=ds.columns[1:], barmode="barmode")
+    fig = px.bar(ds, x=ds.columns[0], y=ds.columns[1:], barmode=barmode)
     fig.show()
 
 
@@ -584,8 +592,13 @@ def pie(ds):
 
 
 def area(ds):
-    ds.plot.area()
-    plt.show()
+    """
+    Generate a stacked area chart from dataset. Assumes first column
+    is the x axis. Any subsequent columns are new datasets.
+    """
+
+    fig = px.area(ds, x=ds.columns[0], y=ds.columns[1:])
+    fig.show()
 
 
 def bar_line(ds):
