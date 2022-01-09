@@ -240,8 +240,38 @@ def reorder_columns(ds, columns):
     rc = ds[[o for o in columns if o in ds.columns] + [c for c in ds.columns if c not in columns]]
     return rc
 
-def group_by():
-    pass
+def group_by(ds, columns):
+    ordered = ds.columns
+
+    # get the columns to be grouped
+    grouped_cols = [c for c in columns.keys() if c in ordered]
+
+    agg = {}
+    rename = {}
+
+    for name, action in columns.items():
+        if action == 'COUNT_DISTINCT':
+            rename[name] = f'COUNT(DISTINCT {name})'
+        else:
+            rename[name] = f'{action}({name})'
+        
+        if action == 'MIN': method = 'min'
+        elif action == 'MAX': method = 'max'
+        elif action == 'MEDIAN': method = 'median'
+        elif action == 'AVG': method = 'mean'
+        elif action == 'COUNT': method = 'count'
+        elif action == 'SUM': method = 'sum'
+        elif action == 'COUNT_DISTINCT': method = 'nunique'
+        elif action == 'GROUP_CONCAT':
+            agg[name] = lambda x: ', '.join(x)
+            continue
+        agg[name] = method
+
+    rc = ds.groupby(grouped_cols, as_index=False).agg(agg)
+    rc = rc[ordered]
+    rc.rename(columns=rename, inplace=True)
+
+    return rc
 
 def histogram_buckets(ds, col, aggregation, bucket_type, custom_buckets):
     if aggregation != 'COUNT':
@@ -309,7 +339,7 @@ def table():
     pass
 
 def line(ds):
-    # Ensure the default "index" column is not part of the plot\n'
+    # Ensure the default "index" column is not part of the plo'
     if type(ds.index) == pd.RangeIndex or type(ds.index) == pd.Int64Index:
         index_column = ds.columns[0]
         ds = ds.set_index(index_column)
