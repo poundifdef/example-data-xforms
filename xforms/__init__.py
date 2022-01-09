@@ -402,7 +402,7 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
                     - percentage
                     - integer
                     - currency
-    
+
     column_precision: Precision of each column. Key is the column name and
                         the value is the number of decimal places.
     """
