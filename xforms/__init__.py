@@ -197,8 +197,35 @@ def unpivot(ds, group_alias, values_alias):
     rc.rename(columns={'index': group_alias, 0: values_alias}, inplace=True)
     return rc
 
-def zero_fill():
-    pass
+def zero_fill(ds, column_types):
+    rc = ds
+
+    col_1_name = ds.columns[0]
+    col_1_type = column_types[col_1_name]
+
+    if col_1_type in ('text', 'real'):
+        # Do nothing for this zero_fill since the
+        # first column is a string or real number
+        pass
+
+    elif col_1_type == 'date':
+        # Do something for this zero_fill since the first column is a date
+        col_1 = rc[col_1_name]
+        date_range = pd.date_range(col_1.min(), col_1.max(), freq='d')
+        diff = date_range.difference(col_1).to_frame()
+        diff.rename(columns={0: col_1_name}, inplace=True)
+        rc = rc.append(diff, ignore_index=True)
+        rc = rc.sort_values(col_1_name)
+
+    else:
+        raise Exception('unsupported zero_fill column type ' + col_1_type)
+
+    for col_name in ds.columns:
+        type = column_types.get(col_name)
+        if type in ('integer', 'real'):
+            rc[col_name].fillna(0, inplace=True)
+
+    return rc
 
 def rename_columns(ds, map):
     rc = ds.rename(columns=map)
