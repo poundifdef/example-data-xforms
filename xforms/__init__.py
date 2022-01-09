@@ -429,7 +429,7 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
             formats.append(f"$,.{precision}f")
         elif col_type == "real":
             precision = precision or 2
-            formats.append(f"$,.{precision}f")
+            formats.append(f",.{precision}f")
         else:
             formats.append(None)
 
