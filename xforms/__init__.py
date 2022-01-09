@@ -554,24 +554,14 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
 
 
 def line(ds):
-    # Ensure the default "index" column is not part of the plo'
-    if type(ds.index) == pd.RangeIndex or type(ds.index) == pd.Int64Index:
-        index_column = ds.columns[0]
-        ds = ds.set_index(index_column)
+    """
+    Generate a line chart from dataset. Assumes first column
+    is the x axis. Any subsequent columns are new datasets.
+    """
 
-    # Configure chart display
-    fig, ax = plt.subplots()
-    ax.yaxis.set_major_formatter(number_formatter)
-    ds.plot.line(ax=ax)
-
-    # Rotate x axis labels 45 degrees
-    fig.autofmt_xdate()
-
-    # Increase chart size
-    fig.set_size_inches(12, 8)
-
-    # Display chart
-    plt.show()
+    fig = px.line(ds, x=ds.columns[0], y=ds.columns[1:])
+    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
+    fig.show()
 
 
 def bar(ds, stacked=False):
