@@ -407,8 +407,46 @@ def sort(ds, sort_columns, sort_directions):
     return rc
 
 
-def pivot():
-    pass
+def pivot(ds, aggregations):
+    aggfuncs = {
+        'SUM': 'numpy.sum',
+        'AVG': 'numpy.average',
+        'MAX': 'numpy.max'
+    }
+
+    if len(aggregations) == 1:
+        rc = ds.pivot_table(
+            index=ds.columns[0],
+            columns=ds.columns[1],
+            values=ds.columns[2],
+            aggfunc=aggfuncs.get(aggregations[0])
+        )
+        rc = rc.fillna(0)
+        rc.reset_index(level=0, inplace=True)
+        rc.columns.name = ''
+
+    else:
+        ordered_cols = list(ds.columns)
+        aggfunc = {}
+
+        for i, fn in enumerate(aggregations):
+            if len(ordered_cols) <= i + 2:
+                break
+            col = ordered_cols[i + 2]
+            aggfunc[col] = aggfuncs.get(fn)
+
+        rc = ds.pivot_table(
+            index=ordered_cols[0:2],
+            aggfunc=aggfunc
+        )
+        rc = rc.unstack()
+        rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=0)[0])
+        rc.columns = [f'{col[1]}:{col[0]}' for col in rc.columns.values]
+        rc = rc.fillna(0)
+        rc.reset_index(level=0, inplace=True)
+        rc.columns.name = ''
+
+    return rc
 
 
 def _join(join_type, datasets, join_on_first_n_columns):
