@@ -423,7 +423,7 @@ def sort(ds, columns):
 
 
 def pivot(ds, aggregations):
-    aggfuncs = {"SUM": "numpy.sum", "AVG": "numpy.average", "MAX": "numpy.max"}
+    aggfuncs = {"SUM": numpy.sum, "AVG": numpy.average, "MAX": numpy.max}
 
     if len(aggregations) == 1:
         rc = ds.pivot_table(
