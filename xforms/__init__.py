@@ -7,6 +7,16 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
+def adapter(fn):
+    def wrapper(row):
+        try:
+            return fn(row)
+        except ZeroDivisionError as e:
+            return None
+
+    return wrapper
+
+
 def format(x, pos):
     m = 0
     while abs(x) >= 1000:
@@ -103,7 +113,7 @@ def substr_new(ds, new_col, source, start=None, end=None):
 
 def custom_new(ds, new_col, function):
     rc = ds
-    rc[new_col] = ds.apply(function, axis=1, result_type="reduce")
+    rc[new_col] = ds.apply(adapter(function), axis=1, result_type="reduce")
     return rc
 
 
@@ -194,7 +204,7 @@ def format(ds, col, arg):
 
 
 def custom(ds, col, function):
-    return custom_new(ds, col, function)
+    return custom_new(ds, col, adapter(function))
 
 
 def combine_columns(
