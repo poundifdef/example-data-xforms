@@ -416,12 +416,9 @@ def table(ds, column_types: dict = None):
     fig = go.Figure(
         data=[
             go.Table(
-                header=dict(
-                    values=list(ds.columns),
-                ),
+                header=dict(values=list(ds.columns), align="left"),
                 cells=dict(
-                    values=[ds[c] for c in ds.columns],
-                    format=formats,
+                    values=[ds[c] for c in ds.columns], format=formats, align="left"
                 ),
             )
         ]
