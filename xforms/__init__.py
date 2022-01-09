@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 def format(x, pos):
@@ -404,9 +405,9 @@ def filter(ds, filters, match_type="all", mode="include"):
 
 
 def sort(ds, columns):
-    m = {1: 'True', -1: 'False'}
-    sort_columns = [c['col_name'] for c in columns]
-    sort_directions = [m[c['direction']] for c in columns]
+    m = {1: "True", -1: "False"}
+    sort_columns = [c["col_name"] for c in columns]
+    sort_directions = [m[c["direction"]] for c in columns]
     rc = ds.sort_values(sort_columns, ascending=sort_directions)
     return rc
 
@@ -602,6 +603,8 @@ def area(ds):
     """
     Generate a stacked area chart from dataset. Assumes first column
     is the x axis. Any subsequent columns are new datasets.
+
+    https://plotly.com/python/filled-area-plots/
     """
 
     fig = px.area(ds, x=ds.columns[0], y=ds.columns[1:])
@@ -609,8 +612,31 @@ def area(ds):
     fig.show()
 
 
-def bar_line(ds):
-    # TODO: change stacked according to settings
-    ds[ds.columns[1:-1]].plot.bar(stacked=True)
-    ds[ds.columns[-1]].plot(kind="line", secondary_y=True)
-    plt.show()
+def bar_line(ds, last_x_columns_as_lines: int):
+    """
+    Generate a combination bar and line chart. The first
+    column is the x axis. The remaining columns are stacked
+    bar charts, and the final x columns are line charts.
+    """
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    for c in range(1, len(ds.columns) - last_x_columns_as_lines):
+        fig.add_trace(
+            go.Bar(
+                x=ds[ds.columns[0]],
+                y=ds[ds.columns[c]],
+                offsetgroup=0,
+                name=ds.columns[c],
+            ),
+            secondary_y=False,
+        )
+
+    for c in range(len(ds.columns) - cols, len(ds.columns)):
+        fig.add_trace(
+            go.Scatter(x=ds[ds.columns[0]], y=ds[ds.columns[c]], name=ds.columns[c]),
+            secondary_y=True,
+        )
+
+    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
+    fig.show()
