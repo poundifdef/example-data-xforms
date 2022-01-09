@@ -298,7 +298,7 @@ def group_by(ds, columns):
     ordered = ds.columns
 
     # get the columns to be grouped
-    grouped_cols = [c for c in columns.keys() if c in ordered]
+    grouped_cols = [c for c in ordered if c not in columns.keys()]
 
     agg = {}
     rename = {}
