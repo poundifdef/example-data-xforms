@@ -424,27 +424,27 @@ def pivot(ds, aggregations):
         rc = rc.fillna(0)
         rc.reset_index(level=0, inplace=True)
         rc.columns.name = ''
+        return rc
 
-    else:
-        ordered_cols = list(ds.columns)
-        aggfunc = {}
+    ordered_cols = list(ds.columns)
+    aggfunc = {}
 
-        for i, fn in enumerate(aggregations):
-            if len(ordered_cols) <= i + 2:
-                break
-            col = ordered_cols[i + 2]
-            aggfunc[col] = aggfuncs.get(fn)
+    for i, fn in enumerate(aggregations):
+        if len(ordered_cols) <= i + 2:
+            break
+        col = ordered_cols[i + 2]
+        aggfunc[col] = aggfuncs.get(fn)
 
-        rc = ds.pivot_table(
-            index=ordered_cols[0:2],
-            aggfunc=aggfunc
-        )
-        rc = rc.unstack()
-        rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=0)[0])
-        rc.columns = [f'{col[1]}:{col[0]}' for col in rc.columns.values]
-        rc = rc.fillna(0)
-        rc.reset_index(level=0, inplace=True)
-        rc.columns.name = ''
+    rc = ds.pivot_table(
+        index=ordered_cols[0:2],
+        aggfunc=aggfunc
+    )
+    rc = rc.unstack()
+    rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=0)[0])
+    rc.columns = [f'{col[1]}:{col[0]}' for col in rc.columns.values]
+    rc = rc.fillna(0)
+    rc.reset_index(level=0, inplace=True)
+    rc.columns.name = ''
 
     return rc
 
@@ -504,6 +504,8 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
 
     # Formatting is done using d3 format specifiers:
     # https://github.com/d3/d3-format/blob/main/README.md
+    # Here is a tool to help test formats:
+    # http://bl.ocks.org/zanarmstrong/05c1e95bf7aa16c4768e
 
     column_types = column_types or {}
     column_precision = column_precision or {}
@@ -589,9 +591,15 @@ def single_value(ds):
 
 
 def pie(ds):
-    y_column = ds.columns[1]
-    ds.plot.pie(y=y_column)
-    plt.show()
+    """
+    Generate a pie chart from the dataset. Assumes the dataset has 2 columns,
+    the first one being the name and second is the value.
+
+    https://plotly.com/python/pie-charts/
+    """
+
+    fig = px.pie(ds, values=ds.columns[1], names=ds.columns[0])
+    fig.show()
 
 
 def area(ds):
