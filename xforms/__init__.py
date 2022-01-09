@@ -402,7 +402,10 @@ def filter(ds, filters, match_type="all", mode="include"):
     return rc
 
 
-def sort(ds, sort_columns, sort_directions):
+def sort(ds, columns):
+    m = {1: 'True', -1: 'False'}
+    sort_columns = [c['col_name'] for c in columns]
+    sort_directions = [m[c['direction']] for c in columns]
     rc = ds.sort_values(sort_columns, ascending=sort_directions)
     return rc
 
