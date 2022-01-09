@@ -534,7 +534,15 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
                     values=[ds[c] for c in ds.columns], format=formats, align="left"
                 ),
             )
-        ]
+        ],
+        layout=go.Layout(
+            margin=go.layout.Margin(
+                l=0, #left margin
+                r=15, #right margin (leave for scroll bar)
+                b=0, #bottom margin
+                t=0, #top margin
+            )
+        )
     )
 
     fig.show()
