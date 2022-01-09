@@ -535,16 +535,9 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
                 ),
             )
         ],
-        layout=go.Layout(
-            margin=go.layout.Margin(
-                l=0, #left margin
-                r=15, #right margin (leave for scroll bar)
-                b=0, #bottom margin
-                t=0, #top margin
-            )
-        )
     )
-
+    # leave margin for scroll bar
+    fig.update_layout(margin=dict(r=15, l=0, t=0, b=0))
     fig.show()
 
 
@@ -583,6 +576,7 @@ def bar(ds, stacked=False):
         barmode = "stacked"
 
     fig = px.bar(ds, x=ds.columns[0], y=ds.columns[1:], barmode=barmode)
+    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
     fig.show()
 
 
@@ -599,6 +593,7 @@ def pie(ds):
     """
 
     fig = px.pie(ds, values=ds.columns[1], names=ds.columns[0])
+    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
     fig.show()
 
 
@@ -609,6 +604,7 @@ def area(ds):
     """
 
     fig = px.area(ds, x=ds.columns[0], y=ds.columns[1:])
+    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
     fig.show()
 
 
