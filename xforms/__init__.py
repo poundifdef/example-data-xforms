@@ -421,7 +421,7 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
 
         if col_type == "percentage":
             precision = precision or 0
-            formats.append(f",.{precision}f%")
+            formats.append(f",.{precision}%")
         elif col_type == "integer":
             formats.append(",.0f")
         elif col_type == "currency":
