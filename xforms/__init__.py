@@ -290,8 +290,65 @@ def histogram_buckets(ds, col, aggregation, bucket_type, custom_buckets):
     rc.rename(columns, inplace=True)
     return rc
 
-def filter():
-    pass
+def filter(ds, filters, match_type='all', mode='include'):
+    # filter definition
+    '''
+    {
+        "column": "col_name",
+        "operator": "<=",
+        "operand": "op",
+        "operand_type": "COLUMN", # or "LITERAL"
+    }
+    '''
+    comparisons = []
+
+    for f in filters:
+        column = f['column']
+        operator = f['operator']
+        operand = f.get('operand')
+        operand_type = f.get('operand_type', 'LITERAL')
+
+        if operand_type == 'COLUMN':
+            operand = ds[operand]
+        else:
+            if operator == 'IN':
+                comparisons.append(ds[column].isin(operand))
+                continue
+        
+        if operator == 'IS NULL':
+            comparisons.append(ds[column].isnull())
+            continue
+
+        if operator == 'IS NOT NULL':
+            comparisons.append(ds[column] is not None)
+            continue
+
+        fn = {
+            '=': 'eq',
+            '!=': 'ne',
+            '>': 'gt',
+            '>=': 'ge',
+            '<': 'lt',
+            '<=': 'le',
+        }
+        if operator in fn:
+            func = getattr(ds[column], fn[operator])
+            comparisons.append(func(operand))
+            continue
+
+        raise Exception(f"filter operator {operator}")
+    
+    rc = comparisons[0]
+    for comparison in comparisons[1:]:
+        if match_type == 'any':
+            rc |= comparison
+        else:
+            rc &= comparison
+    
+    if mode == 'exclude':
+        rc = ~rc
+    
+    return rc
 
 def sort(ds, sort_columns, sort_directions):
     rc = ds.sort_values(
