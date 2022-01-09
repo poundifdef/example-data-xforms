@@ -417,7 +417,7 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
     for col_name in ds.columns:
 
         col_type = column_types.get(col_name)
-        precision = column_precision(col_name)
+        precision = column_precision.get(col_name)
 
         if col_type == "percentage":
             precision = precision or 0
