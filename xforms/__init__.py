@@ -84,8 +84,58 @@ def custom_new(ds, new_col, function):
     rc[new_col] = ds.apply(function, axis=1, result_type='reduce')
     return rc
 
-def case_statement_new(ds, new_col):
-    pass
+def case_statement_new(ds, new_col, source, conditions, default, default_type='LITERAL'):
+    rc = ds
+
+    if default_type == 'COLUMN':
+        rc[new_col] = rc[default]
+    else:
+        rc[new_col] = default
+    
+    for condition in conditions:
+        value = condition['value']
+        value_type = condition['value_type']
+        operand = condition['operand']
+        operator = condition['operator']
+
+        if value_type == 'COLUMN':
+            value = rc[value]
+
+        # determine the operand type
+        
+        if operator == 'LIKE':
+            # None of the LIKE operators in the data have percent signs
+            operator = '='
+        
+        # the data doesn't contain NOT LIKE
+
+        # TODO: determine whether values should be compared using int or str
+
+        if operator in ['=', '!=', '>', '>=', '<', '<=']:
+            fn = {
+                '=': 'eq',
+                '!=': 'ne',
+                '>': 'gt',
+                '>=': 'ge',
+                '<': 'lt',
+                '<=': 'le',
+            }
+            f = getattr(rc[source], fn[operator])
+            rc.loc[f(operand), new_col] = value
+        
+        elif operator == 'IS NOT' and operand == 'null':
+            rc.loc[pd.notnull(rc[source]), new_col] = value
+        
+        elif operator == 'IS' and operand == 'null':
+            rc.loc[pd.isnull(rc[source]), new_col] = value
+        
+        elif operator == 'IS' and operand == "''":
+            rc.loc[rc[source] == '', new_col] = value
+
+        else:
+            raise Exception(f'{operator} is not supported')
+
+    return rc
 
 def add(ds, col, addend):
     return add_new(ds, col, col, addend)
