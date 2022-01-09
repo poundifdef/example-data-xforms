@@ -341,46 +341,46 @@ def histogram_buckets(ds, col, aggregation, bucket_type, custom_buckets):
     return rc
 
 
-def filter(ds, filters, match_type='all', mode='include'):
+def filter(ds, filters, match_type="all", mode="include"):
     # filter definition
-    '''
+    """
     {
         "column": "col_name",
         "operator": "<=",
         "operand": "op",
         "operand_type": "COLUMN", # or "LITERAL"
     }
-    '''
+    """
     comparisons = []
 
     for f in filters:
-        column = f['column']
-        operator = f['operator']
-        operand = f.get('operand')
-        operand_type = f.get('operand_type', 'LITERAL')
+        column = f["column"]
+        operator = f["operator"]
+        operand = f.get("operand")
+        operand_type = f.get("operand_type", "LITERAL")
 
-        if operand_type == 'COLUMN':
+        if operand_type == "COLUMN":
             operand = ds[operand]
         else:
-            if operator == 'IN':
+            if operator == "IN":
                 comparisons.append(ds[column].isin(operand))
                 continue
-        
-        if operator == 'IS NULL':
+
+        if operator == "IS NULL":
             comparisons.append(ds[column].isnull())
             continue
 
-        if operator == 'IS NOT NULL':
+        if operator == "IS NOT NULL":
             comparisons.append(ds[column] is not None)
             continue
 
         fn = {
-            '=': 'eq',
-            '!=': 'ne',
-            '>': 'gt',
-            '>=': 'ge',
-            '<': 'lt',
-            '<=': 'le',
+            "=": "eq",
+            "!=": "ne",
+            ">": "gt",
+            ">=": "ge",
+            "<": "lt",
+            "<=": "le",
         }
         if operator in fn:
             func = getattr(ds[column], fn[operator])
@@ -388,17 +388,17 @@ def filter(ds, filters, match_type='all', mode='include'):
             continue
 
         raise Exception(f"filter operator {operator}")
-    
+
     rc = comparisons[0]
     for comparison in comparisons[1:]:
-        if match_type == 'any':
+        if match_type == "any":
             rc |= comparison
         else:
             rc &= comparison
-    
-    if mode == 'exclude':
+
+    if mode == "exclude":
         rc = ~rc
-    
+
     return rc
 
 
@@ -411,22 +411,18 @@ def sort(ds, columns):
 
 
 def pivot(ds, aggregations):
-    aggfuncs = {
-        'SUM': 'numpy.sum',
-        'AVG': 'numpy.average',
-        'MAX': 'numpy.max'
-    }
+    aggfuncs = {"SUM": "numpy.sum", "AVG": "numpy.average", "MAX": "numpy.max"}
 
     if len(aggregations) == 1:
         rc = ds.pivot_table(
             index=ds.columns[0],
             columns=ds.columns[1],
             values=ds.columns[2],
-            aggfunc=aggfuncs.get(aggregations[0])
+            aggfunc=aggfuncs.get(aggregations[0]),
         )
         rc = rc.fillna(0)
         rc.reset_index(level=0, inplace=True)
-        rc.columns.name = ''
+        rc.columns.name = ""
         return rc
 
     ordered_cols = list(ds.columns)
@@ -438,16 +434,13 @@ def pivot(ds, aggregations):
         col = ordered_cols[i + 2]
         aggfunc[col] = aggfuncs.get(fn)
 
-    rc = ds.pivot_table(
-        index=ordered_cols[0:2],
-        aggfunc=aggfunc
-    )
+    rc = ds.pivot_table(index=ordered_cols[0:2], aggfunc=aggfunc)
     rc = rc.unstack()
     rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=0)[0])
-    rc.columns = [f'{col[1]}:{col[0]}' for col in rc.columns.values]
+    rc.columns = [f"{col[1]}:{col[0]}" for col in rc.columns.values]
     rc = rc.fillna(0)
     rc.reset_index(level=0, inplace=True)
-    rc.columns.name = ''
+    rc.columns.name = ""
 
     return rc
 
@@ -568,25 +561,13 @@ def line(ds):
     plt.show()
 
 
-def bar(ds):
-    # Ensure the default "index" column is not part of the plot
-    if type(ds.index) == pd.RangeIndex or type(ds.index) == pd.Int64Index:
-        index_column = ds.columns[0]
-        ds = ds.set_index(index_column)
+def bar(ds, stacked=False):
+    barmode = "group"
+    if stacked:
+        barmode = "stacked"
 
-    # Configure chart display
-    fig, ax = plt.subplots()
-    ax.yaxis.set_major_formatter(number_formatter)
-    ds.plot.bar(ax=ax)
-
-    # Rotate x axis labels 45 degrees
-    fig.autofmt_xdate()
-
-    # Increase chart size
-    fig.set_size_inches(12, 8)
-
-    # Display chart
-    plt.show()
+    fig = px.bar(ds, x=ds.columns[0], y=ds.columns[1:], barmode="barmode")
+    fig.show()
 
 
 def single_value(ds):
