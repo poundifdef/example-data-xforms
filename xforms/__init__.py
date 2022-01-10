@@ -448,7 +448,7 @@ def pivot(ds, aggregations):
 
     rc = ds.pivot_table(index=ordered_cols[0:2], aggfunc=aggfunc)
     rc = rc.unstack()
-    rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=0)[0])
+    rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=10)[0])
     rc.columns = [f"{col[1]}:{col[0]}" for col in rc.columns.values]
     rc = rc.fillna(0)
     rc.reset_index(level=0, inplace=True)
@@ -549,7 +549,7 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
         ],
     )
     # leave margin for scroll bar
-    fig.update_layout(margin=dict(r=15, l=0, t=0, b=0))
+    fig.update_layout(margin=dict(r=25, l=10, t=0, b=0))
     fig.show()
 
 
@@ -560,7 +560,7 @@ def line(ds):
     """
 
     fig = px.line(ds, x=ds.columns[0], y=ds.columns[1:])
-    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
+    fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
 
@@ -578,7 +578,7 @@ def bar(ds, stacked=False):
         barmode = "stack"
 
     fig = px.bar(ds, x=ds.columns[0], y=ds.columns[1:], barmode=barmode)
-    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
+    fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
 
@@ -595,7 +595,7 @@ def pie(ds):
     """
 
     fig = px.pie(ds, values=ds.columns[1], names=ds.columns[0])
-    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
+    fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
 
@@ -608,7 +608,7 @@ def area(ds):
     """
 
     fig = px.area(ds, x=ds.columns[0], y=ds.columns[1:])
-    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
+    fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
 
@@ -638,5 +638,5 @@ def bar_line(ds, last_x_columns_as_lines: int):
             secondary_y=True,
         )
 
-    fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
+    fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
