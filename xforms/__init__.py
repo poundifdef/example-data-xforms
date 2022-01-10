@@ -575,7 +575,7 @@ def bar(ds, stacked=False):
 
     barmode = "group"
     if stacked:
-        barmode = "stacked"
+        barmode = "stack"
 
     fig = px.bar(ds, x=ds.columns[0], y=ds.columns[1:], barmode=barmode)
     fig.update_layout(margin=dict(r=0, l=0, t=0, b=0))
