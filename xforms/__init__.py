@@ -632,7 +632,7 @@ def bar_line(ds, last_x_columns_as_lines: int):
             secondary_y=False,
         )
 
-    for c in range(len(ds.columns) - cols, len(ds.columns)):
+    for c in range(len(ds.columns) - last_x_columns_as_lines, len(ds.columns)):
         fig.add_trace(
             go.Scatter(x=ds[ds.columns[0]], y=ds[ds.columns[c]], name=ds.columns[c]),
             secondary_y=True,
