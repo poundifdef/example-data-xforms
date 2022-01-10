@@ -35,7 +35,7 @@ def transpose(ds):
 
 
 def column_ratio_new(ds, new_col, dividend, divisor):
-    return divide(ds, new_col, dividend, divisor)
+    return divide_new(ds, new_col, dividend, divisor)
 
 
 def subtract_new(ds, new_col, minuend, subtrahend):
@@ -420,7 +420,7 @@ def sort(ds, columns):
     m = {1: True, -1: False}
     sort_columns = [c["col_name"] for c in columns]
     sort_directions = [m[c["direction"]] for c in columns]
-    rc = ds.sort_values(sort_columns, ascending=sort_directions)
+    rc = ds.sort_values(sort_columns, ascending=sort_directions, na_position='first')
     return rc
 
 
@@ -634,7 +634,7 @@ def bar_line(ds, last_x_columns_as_lines: int):
             secondary_y=False,
         )
 
-    for c in range(len(ds.columns) - cols, len(ds.columns)):
+    for c in range(len(ds.columns) - last_x_columns_as_lines, len(ds.columns)):
         fig.add_trace(
             go.Scatter(x=ds[ds.columns[0]], y=ds[ds.columns[c]], name=ds.columns[c]),
             secondary_y=True,
