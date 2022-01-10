@@ -35,7 +35,7 @@ def transpose(ds):
 
 
 def column_ratio_new(ds, new_col, dividend, divisor):
-    return divide(ds, new_col, dividend, divisor)
+    return divide_new(ds, new_col, dividend, divisor)
 
 
 def subtract_new(ds, new_col, minuend, subtrahend):
@@ -418,7 +418,7 @@ def sort(ds, columns):
     m = {1: True, -1: False}
     sort_columns = [c["col_name"] for c in columns]
     sort_directions = [m[c["direction"]] for c in columns]
-    rc = ds.sort_values(sort_columns, ascending=sort_directions)
+    rc = ds.sort_values(sort_columns, ascending=sort_directions, na_position='first')
     return rc
 
 
