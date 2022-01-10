@@ -415,7 +415,7 @@ def filter(ds, filters, match_type="all", mode="include"):
 
 
 def sort(ds, columns):
-    m = {1: "True", -1: "False"}
+    m = {1: True, -1: False}
     sort_columns = [c["col_name"] for c in columns]
     sort_directions = [m[c["direction"]] for c in columns]
     rc = ds.sort_values(sort_columns, ascending=sort_directions)
