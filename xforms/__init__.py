@@ -410,6 +410,8 @@ def filter(ds, filters, match_type="all", mode="include"):
 
     if mode == "exclude":
         rc = ~rc
+    
+    rc = ds[rc]
 
     return rc
 
