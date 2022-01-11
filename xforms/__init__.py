@@ -563,6 +563,7 @@ def line(ds):
 
     fig = px.line(ds, x=ds.columns[0], y=ds.columns[1:])
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
+    fig.update_yaxes(rangemode="tozero")
     fig.show()
 
 
