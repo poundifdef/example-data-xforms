@@ -420,7 +420,9 @@ def sort(ds, columns):
     m = {1: True, -1: False}
     sort_columns = [c["col_name"] for c in columns]
     sort_directions = [m[c["direction"]] for c in columns]
-    rc = ds.sort_values(sort_columns, ascending=sort_directions, na_position="first")
+    rc = ds.sort_values(
+        sort_columns, ascending=sort_directions, na_position="first", ignore_index=True
+    )
     return rc
 
 
@@ -457,7 +459,7 @@ def pivot(ds, aggregations):
 
         # Sort values based on original order, rather than re-ordering
         # which is what pivot_table() does by default.
-        rc.sort_values(ds.columns[0], key=sort_column, inplace=True)
+        rc.sort_values(ds.columns[0], key=sort_column, inplace=True, ignore_index=True)
 
         return rc
 
