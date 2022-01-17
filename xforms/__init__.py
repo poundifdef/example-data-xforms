@@ -431,15 +431,16 @@ def pivot(ds, aggregations):
         in the previous step. This is to work around the fact that
         pivot_table() automatically sorts the output.
         """
-        rc = []
+        sort_keys = []
         column_name = ds.columns[0]
         for value in column_values:
             # Find the original index of this key, and use that as the
             # sort key.
             original_index = ds[ds[column_name] == value].index[0]
-            rc.append(original_index)
+            print(value, original_index)
+            sort_keys.append(original_index)
 
-        return rc
+        return sort_keys
 
     aggfuncs = {"SUM": np.sum, "AVG": np.average, "MAX": np.max}
 
