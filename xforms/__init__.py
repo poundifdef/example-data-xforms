@@ -410,7 +410,7 @@ def filter(ds, filters, match_type="all", mode="include"):
 
     if mode == "exclude":
         rc = ~rc
-    
+
     rc = ds[rc]
 
     return rc
@@ -420,11 +420,27 @@ def sort(ds, columns):
     m = {1: True, -1: False}
     sort_columns = [c["col_name"] for c in columns]
     sort_directions = [m[c["direction"]] for c in columns]
-    rc = ds.sort_values(sort_columns, ascending=sort_directions, na_position='first')
+    rc = ds.sort_values(sort_columns, ascending=sort_directions, na_position="first")
     return rc
 
 
 def pivot(ds, aggregations):
+    def sort_column(column_values):
+        """
+        Used to sort a list of values based on the order they appeared
+        in the previous step. This is to work around the fact that
+        pivot_table() automatically sorts the output.
+        """
+        rc = []
+        column_name = ds.columns[0]
+        for value in column_values:
+            # Find the original index of this key, and use that as the
+            # sort key.
+            original_index = ds[ds[column_name] == value].index[0]
+            rc.append(original_index)
+
+        return rc
+
     aggfuncs = {"SUM": np.sum, "AVG": np.average, "MAX": np.max}
 
     if len(aggregations) == 1:
@@ -437,6 +453,11 @@ def pivot(ds, aggregations):
         rc = rc.fillna(0)
         rc.reset_index(level=0, inplace=True)
         rc.columns.name = ""
+
+        # Sort values based on original order, rather than re-ordering
+        # which is what pivot_table() does by default.
+        rc.sort_values(ds.columns[0], key=sort_column, inplace=True)
+
         return rc
 
     ordered_cols = list(ds.columns)
