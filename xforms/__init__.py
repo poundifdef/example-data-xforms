@@ -439,7 +439,6 @@ def pivot(ds, aggregations):
             # Find the original index of this key, and use that as the
             # sort key.
             original_index = ds[ds[column_name] == value].index[0]
-            print(value, original_index)
             sort_keys.append(original_index)
 
         return sort_keys
