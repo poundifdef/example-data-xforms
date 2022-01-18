@@ -612,13 +612,16 @@ def single_value(ds):
     print(ds.iloc[0, 0])
 
 
-def pie(ds):
+def pie(ds, max_items=10):
     """
     Generate a pie chart from the dataset. Assumes the dataset has 2 columns,
     the first one being the name and second is the value.
 
     https://plotly.com/python/pie-charts/
     """
+
+    if len(ds) > max_items:
+        ds.loc[max_items, ds.columns[0]] = 'Other'
 
     fig = px.pie(ds, values=ds.columns[1], names=ds.columns[0])
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
