@@ -473,7 +473,7 @@ def pivot(ds, aggregations):
 
     rc = ds.pivot_table(index=ordered_cols[0:2], aggfunc=aggfunc)
     rc = rc.unstack()
-    rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=10)[0])
+    rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=rc.index.nlevels - 1)[0])
     rc.columns = [f"{col[1]}:{col[0]}" for col in rc.columns.values]
     rc = rc.fillna(0)
     rc.reset_index(level=0, inplace=True)
