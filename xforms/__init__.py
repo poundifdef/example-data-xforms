@@ -562,6 +562,9 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
             formats.append(f",.{precision}f")
         else:
             formats.append(None)
+    
+    # ensure nulls render as empty
+    ds.fillna('', inplace = True)
 
     fig = go.Figure(
         data=[
