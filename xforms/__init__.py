@@ -624,7 +624,7 @@ def pie(ds, max_items=10):
     """
 
     if len(ds) > max_items:
-        ds.loc[max_items, ds.columns[0]] = 'Other'
+        ds.loc[max_items:, ds.columns[0]] = 'Other'
 
     fig = px.pie(ds, values=ds.columns[1], names=ds.columns[0])
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
