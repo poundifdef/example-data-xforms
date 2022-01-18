@@ -672,3 +672,13 @@ def bar_line(ds, last_x_columns_as_lines: int):
 
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
+
+
+def funnel(ds):
+    """
+    Generate a funnel chart. The first column is the y axis.
+    The second column is the x axis.
+    """
+
+    fig = px.funnel(ds, x=ds.columns[1], y=ds.columns[0])
+    fig.show()
