@@ -647,12 +647,12 @@ def area(ds):
                 x=ds[ds.columns[0]], y=ds[col], mode="lines", stackgroup="one", name=col
             )
         )
-    fig.show()
 
     # This does not work consistently:
     # fig = px.area(ds, x=ds.columns[0], y=ds.columns[1:])
-    # fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
-    # fig.show()
+
+    fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
+    fig.show()
 
 
 def bar_line(ds, last_x_columns_as_lines: int):
