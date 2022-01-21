@@ -455,29 +455,27 @@ def pivot(ds, aggregations):
         rc = rc.fillna(0)
         rc.reset_index(level=0, inplace=True)
         rc.columns.name = ""
+    else:
+        ordered_cols = list(ds.columns)
+        aggfunc = {}
 
-        # Sort values based on original order, rather than re-ordering
-        # which is what pivot_table() does by default.
-        rc.sort_values(ds.columns[0], key=sort_column, inplace=True, ignore_index=True)
+        for i, fn in enumerate(aggregations):
+            if len(ordered_cols) <= i + 2:
+                break
+            col = ordered_cols[i + 2]
+            aggfunc[col] = aggfuncs.get(fn)
 
-        return rc
+        rc = ds.pivot_table(index=ordered_cols[0:2], aggfunc=aggfunc)
+        rc = rc.unstack()
+        rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=rc.index.nlevels - 1)[0])
+        rc.columns = [f"{col[1]}:{col[0]}" for col in rc.columns.values]
+        rc = rc.fillna(0)
+        rc.reset_index(level=0, inplace=True)
+        rc.columns.name = ""
 
-    ordered_cols = list(ds.columns)
-    aggfunc = {}
-
-    for i, fn in enumerate(aggregations):
-        if len(ordered_cols) <= i + 2:
-            break
-        col = ordered_cols[i + 2]
-        aggfunc[col] = aggfuncs.get(fn)
-
-    rc = ds.pivot_table(index=ordered_cols[0:2], aggfunc=aggfunc)
-    rc = rc.unstack()
-    rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=rc.index.nlevels - 1)[0])
-    rc.columns = [f"{col[1]}:{col[0]}" for col in rc.columns.values]
-    rc = rc.fillna(0)
-    rc.reset_index(level=0, inplace=True)
-    rc.columns.name = ""
+    # Sort values based on original order, rather than re-ordering
+    # which is what pivot_table() does by default.
+    rc.sort_values(ds.columns[0], key=sort_column, inplace=True, ignore_index=True)
 
     return rc
 
@@ -566,6 +564,7 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
     # ensure nulls render as empty
     ds.fillna('', inplace = True)
 
+    # TODO: https://dash.plotly.com/datatable/width#horizontal-scroll
     fig = go.Figure(
         data=[
             go.Table(
