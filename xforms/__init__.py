@@ -467,7 +467,9 @@ def pivot(ds, aggregations):
 
         rc = ds.pivot_table(index=ordered_cols[0:2], aggfunc=aggfunc)
         rc = rc.unstack()
-        rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=rc.index.nlevels - 1)[0])
+        rc = rc.reindex(
+            columns=rc.columns.reindex(ordered_cols, level=rc.index.nlevels - 1)[0]
+        )
         rc.columns = [f"{col[1]}:{col[0]}" for col in rc.columns.values]
         rc = rc.fillna(0)
         rc.reset_index(level=0, inplace=True)
@@ -560,9 +562,9 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
             formats.append(f",.{precision}f")
         else:
             formats.append(None)
-    
+
     # ensure nulls render as empty
-    ds.fillna('', inplace = True)
+    ds.fillna("", inplace=True)
 
     # TODO: https://dash.plotly.com/datatable/width#horizontal-scroll
     fig = go.Figure(
@@ -623,7 +625,7 @@ def pie(ds, max_items=10):
     """
 
     if len(ds) > max_items:
-        ds.loc[max_items:, ds.columns[0]] = 'Other'
+        ds.loc[max_items:, ds.columns[0]] = "Other"
 
     fig = px.pie(ds, values=ds.columns[1], names=ds.columns[0])
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
@@ -638,9 +640,19 @@ def area(ds):
     https://plotly.com/python/filled-area-plots/
     """
 
-    fig = px.area(ds, x=ds.columns[0], y=ds.columns[1:])
-    fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
+    fig = go.Figure()
+    for col in ds.columns[1:]:
+        fig.add_trace(
+            go.Scatter(
+                x=ds[ds.columns[0]], y=ds[col], mode="lines", stackgroup="one", name=col
+            )
+        )
     fig.show()
+
+    # This does not work consistently:
+    # fig = px.area(ds, x=ds.columns[0], y=ds.columns[1:])
+    # fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
+    # fig.show()
 
 
 def bar_line(ds, last_x_columns_as_lines: int):
