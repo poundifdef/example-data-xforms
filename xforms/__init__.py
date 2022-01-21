@@ -631,7 +631,7 @@ def pie(ds, max_items=10):
     if len(sorted_data) > max_items:
         sorted_data.loc[max_items:, sorted_data.columns[0]] = "Other"
 
-    fig = px.pie(ds, values=sorted_data.columns[1], names=sorted_data.columns[0])
+    fig = px.pie(sorted_data, values=sorted_data.columns[1], names=sorted_data.columns[0])
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
