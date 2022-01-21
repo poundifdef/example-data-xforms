@@ -714,12 +714,16 @@ def bubble_map(ds):
     https://plotly.com/python/bubble-maps/
     """
 
+    size = None
+    if len(ds.columns) >= 4:
+        size = ds[ds.columns[3]]
+
     fig = px.scatter_geo(
         ds,
         lat=ds[ds.columns[1]],
         lon=ds[ds.columns[2]],
         hover_name=ds[ds.columns[0]],
-        size=ds[ds.columns[3]],  # TODO: this should be made optional
+        size=size,
     )
 
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
