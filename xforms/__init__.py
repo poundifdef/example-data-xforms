@@ -627,7 +627,7 @@ def pie(ds, max_items=10):
     https://plotly.com/python/pie-charts/
     """
 
-    sorted_data = sort(ds, {ds.columns[1]: -1})
+    sorted_data = sort(ds, [{'col_name': ds.columns[1], 'direction': -1}])
     if len(sorted_data) > max_items:
         sorted_data.loc[max_items:, sorted_data.columns[0]] = "Other"
 
