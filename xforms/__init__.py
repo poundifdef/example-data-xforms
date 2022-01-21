@@ -304,6 +304,9 @@ def group_by(ds, columns):
     rename = {}
 
     for name, action in columns.items():
+        if name not in ds.columns:
+            continue
+
         if action == "COUNT_DISTINCT":
             rename[name] = f"COUNT(DISTINCT {name})"
         else:
@@ -624,10 +627,11 @@ def pie(ds, max_items=10):
     https://plotly.com/python/pie-charts/
     """
 
-    if len(ds) > max_items:
-        ds.loc[max_items:, ds.columns[0]] = "Other"
+    sorted_data = sort(ds, {ds.columns[1]: -1})
+    if len(sorted_data) > max_items:
+        sorted_data.loc[max_items:, sorted_data.columns[0]] = "Other"
 
-    fig = px.pie(ds, values=ds.columns[1], names=ds.columns[0])
+    fig = px.pie(ds, values=sorted_data.columns[1], names=sorted_data.columns[0])
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
