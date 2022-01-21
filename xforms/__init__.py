@@ -304,6 +304,9 @@ def group_by(ds, columns):
     rename = {}
 
     for name, action in columns.items():
+        if name not in ds.columns:
+            continue
+
         if action == "COUNT_DISTINCT":
             rename[name] = f"COUNT(DISTINCT {name})"
         else:
@@ -467,7 +470,9 @@ def pivot(ds, aggregations):
 
         rc = ds.pivot_table(index=ordered_cols[0:2], aggfunc=aggfunc)
         rc = rc.unstack()
-        rc = rc.reindex(columns=rc.columns.reindex(ordered_cols, level=rc.index.nlevels - 1)[0])
+        rc = rc.reindex(
+            columns=rc.columns.reindex(ordered_cols, level=rc.index.nlevels - 1)[0]
+        )
         rc.columns = [f"{col[1]}:{col[0]}" for col in rc.columns.values]
         rc = rc.fillna(0)
         rc.reset_index(level=0, inplace=True)
@@ -576,9 +581,9 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
             formats.append(f",.{precision}f")
         else:
             formats.append(None)
-    
+
     # ensure nulls render as empty
-    ds.fillna('', inplace = True)
+    ds.fillna("", inplace=True)
 
     # TODO: https://dash.plotly.com/datatable/width#horizontal-scroll
     fig = go.Figure(
@@ -638,10 +643,11 @@ def pie(ds, max_items=10):
     https://plotly.com/python/pie-charts/
     """
 
-    if len(ds) > max_items:
-        ds.loc[max_items:, ds.columns[0]] = 'Other'
+    sorted_data = sort(ds, [{'col_name': ds.columns[1], 'direction': -1}])
+    if len(sorted_data) > max_items:
+        sorted_data.loc[max_items:, sorted_data.columns[0]] = "Other"
 
-    fig = px.pie(ds, values=ds.columns[1], names=ds.columns[0])
+    fig = px.pie(sorted_data, values=sorted_data.columns[1], names=sorted_data.columns[0])
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
@@ -654,7 +660,17 @@ def area(ds):
     https://plotly.com/python/filled-area-plots/
     """
 
-    fig = px.area(ds, x=ds.columns[0], y=ds.columns[1:])
+    fig = go.Figure()
+    for col in ds.columns[1:]:
+        fig.add_trace(
+            go.Scatter(
+                x=ds[ds.columns[0]], y=ds[col], mode="lines", stackgroup="one", name=col
+            )
+        )
+
+    # This does not work consistently:
+    # fig = px.area(ds, x=ds.columns[0], y=ds.columns[1:])
+
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
@@ -696,4 +712,39 @@ def funnel(ds):
     """
 
     fig = px.funnel(ds, x=ds.columns[1], y=ds.columns[0])
+    fig.show()
+
+
+def bubble_map(ds):
+    """
+    Show a geographical map of data. Assumes the following columns. This is from
+    Chartio:
+
+    1. label
+    2. latitude
+    3. longitude
+    4. value (optional)
+    5. group (optional)
+
+    Columns 2 through 4 must be numeric,
+    column 2 must have values between -90 and 90,
+    column 3 must have values between -180 and 180, and
+    column 4 can’t be negative.
+
+    https://plotly.com/python/bubble-maps/
+    """
+
+    size = None
+    if len(ds.columns) >= 4:
+        size = ds[ds.columns[3]]
+
+    fig = px.scatter_geo(
+        ds,
+        lat=ds[ds.columns[1]],
+        lon=ds[ds.columns[2]],
+        hover_name=ds[ds.columns[0]],
+        size=size,
+    )
+
+    fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
