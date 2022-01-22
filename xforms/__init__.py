@@ -525,6 +525,15 @@ def _join(join_type, datasets, join_on_first_n_columns):
             right_on=list(right_data_renamed.columns[:join_on_first_n_columns]),
             suffixes=(None, ":1"),
         )
+    
+    # sort first n columns
+    columns = []
+    for n in range(join_on_first_n_columns):
+        columns.append({
+            "col_name": rc.columns[n],
+            "direction": 1
+        })
+    rc = sort(rc, columns)
 
     return rc
 
