@@ -11,6 +11,8 @@ def adapter(fn):
     def wrapper(row):
         try:
             return fn(row)
+        except ValueError as e:
+            return None
         except ZeroDivisionError as e:
             return None
 
