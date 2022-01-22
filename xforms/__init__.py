@@ -377,6 +377,13 @@ def filter(ds, filters, match_type="all", mode="include"):
         if operand_type == "COLUMN":
             operand = ds[operand]
         else:
+            if operator and operator[0] in ('<', '>'):
+                # attempt to coerce the operand to a number
+                try:
+                    operand = float(operand)
+                except:
+                    pass
+                
             if operator == "IN":
                 comparisons.append(ds[column].isin(operand))
                 continue
