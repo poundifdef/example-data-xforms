@@ -68,6 +68,19 @@ def total_column_sum_new(ds, new_col):
     return rc
 
 
+def markdown_link_new(ds, new_col, link, title):
+    rc = ds
+    i = 0
+
+    final_col_name = new_col
+    while final_col_name in rc.columns:
+        i += 1
+        final_col_name = f"{new_col}:{i}"
+
+    rc[final_col_name] = f"[{ds[title]}]({ds[link]})"
+    return rc
+
+
 def aggregation_new(ds, new_col, source, operation):
     if operation != "sum":
         raise Exception(f"Aggregating with {operation} is not supported")
@@ -515,11 +528,12 @@ def _join(join_type, datasets, join_on_first_n_columns):
 
     return rc
 
+
 def _column_types_match(datasets, first_n_columns):
     # TODO: handle more than 2 datasets
     if len(datasets) > 2:
         return True
-    
+
     d1 = datasets[0]
     d2 = datasets[1]
     for n in range(first_n_columns):
@@ -527,8 +541,9 @@ def _column_types_match(datasets, first_n_columns):
         c2 = d2.columns[n]
         if d1.dtypes[c1] != d2.dtypes[c2]:
             return False
-    
+
     return True
+
 
 def full_outer_join(datasets, join_on_first_n_columns):
     return _join("outer", datasets, join_on_first_n_columns)
@@ -614,7 +629,15 @@ def line(ds):
     is the x axis. Any subsequent columns are new datasets.
     """
 
-    fig = px.line(ds, x=ds.columns[0], y=ds.columns[1:])
+    # Does not work consistently with multiple lines
+    # fig = px.line(ds, x=ds.columns[0], y=ds.columns[1:])
+
+    fig = go.Figure()
+    for col in ds.columns[1:]:
+        fig.add_trace(
+            go.Scatter(x=ds[ds.columns[0]], y=ds[col], mode="lines", name=col)
+        )
+
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.update_yaxes(rangemode="tozero")
     fig.show()
@@ -650,11 +673,13 @@ def pie(ds, max_items=10):
     https://plotly.com/python/pie-charts/
     """
 
-    sorted_data = sort(ds, [{'col_name': ds.columns[1], 'direction': -1}])
+    sorted_data = sort(ds, [{"col_name": ds.columns[1], "direction": -1}])
     if len(sorted_data) > max_items:
         sorted_data.loc[max_items:, sorted_data.columns[0]] = "Other"
 
-    fig = px.pie(sorted_data, values=sorted_data.columns[1], names=sorted_data.columns[0])
+    fig = px.pie(
+        sorted_data, values=sorted_data.columns[1], names=sorted_data.columns[0]
+    )
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
@@ -722,7 +747,7 @@ def funnel(ds):
     fig.show()
 
 
-def bubble_map(ds):
+def bubble_map(ds, map_type=None):
     """
     Show a geographical map of data. Assumes the following columns. This is from
     Chartio:
@@ -741,9 +766,18 @@ def bubble_map(ds):
     https://plotly.com/python/bubble-maps/
     """
 
+    # This column is used for the size fo the bubble
     size = None
     if len(ds.columns) >= 4:
         size = ds[ds.columns[3]]
+
+    # Where is our map focused?
+    if map_type == "us":
+        scope = "usa"
+    elif map_type == "world_map":
+        scope = "world"
+    else:
+        scope = "world"
 
     fig = px.scatter_geo(
         ds,
@@ -751,6 +785,7 @@ def bubble_map(ds):
         lon=ds[ds.columns[2]],
         hover_name=ds[ds.columns[0]],
         size=size,
+        scope=scope,
     )
 
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
