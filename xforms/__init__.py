@@ -627,11 +627,13 @@ def pie(ds, max_items=10):
     https://plotly.com/python/pie-charts/
     """
 
-    sorted_data = sort(ds, [{'col_name': ds.columns[1], 'direction': -1}])
+    sorted_data = sort(ds, [{"col_name": ds.columns[1], "direction": -1}])
     if len(sorted_data) > max_items:
         sorted_data.loc[max_items:, sorted_data.columns[0]] = "Other"
 
-    fig = px.pie(sorted_data, values=sorted_data.columns[1], names=sorted_data.columns[0])
+    fig = px.pie(
+        sorted_data, values=sorted_data.columns[1], names=sorted_data.columns[0]
+    )
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.show()
 
@@ -699,7 +701,7 @@ def funnel(ds):
     fig.show()
 
 
-def bubble_map(ds):
+def bubble_map(ds, map_type=None):
     """
     Show a geographical map of data. Assumes the following columns. This is from
     Chartio:
@@ -718,9 +720,18 @@ def bubble_map(ds):
     https://plotly.com/python/bubble-maps/
     """
 
+    # This column is used for the size fo the bubble
     size = None
     if len(ds.columns) >= 4:
         size = ds[ds.columns[3]]
+
+    # Where is our map focused?
+    if map_type == "us":
+        scope = "usa"
+    elif map_type == "world_map":
+        scope = "world"
+    else:
+        scope = "world"
 
     fig = px.scatter_geo(
         ds,
@@ -728,6 +739,7 @@ def bubble_map(ds):
         lon=ds[ds.columns[2]],
         hover_name=ds[ds.columns[0]],
         size=size,
+        scope=scope,
     )
 
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
