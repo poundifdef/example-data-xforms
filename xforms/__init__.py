@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import warnings
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import plotly.express as px
@@ -11,6 +12,9 @@ def adapter(fn):
     def wrapper(row):
         try:
             return fn(row)
+        except KeyError as e:
+            warnings.warn(f'Warning: No key for {e}')
+            return 0
         except ValueError as e:
             return None
         except ZeroDivisionError as e:
