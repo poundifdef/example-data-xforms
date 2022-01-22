@@ -70,7 +70,14 @@ def total_column_sum_new(ds, new_col):
 
 def markdown_link_new(ds, new_col, link, title):
     rc = ds
-    rc[new_col] = f"[{ds[title]}]({ds[link]})"
+    i = 0
+
+    final_col_name = new_col
+    while final_col_name in rc.columns:
+        i += 1
+        final_col_name = f"{new_col}:{i}"
+
+    rc[final_col_name] = f"[{ds[title]}]({ds[link]})"
     return rc
 
 
