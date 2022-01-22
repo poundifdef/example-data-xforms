@@ -13,7 +13,7 @@ def adapter(fn):
         try:
             return fn(row)
         except KeyError as e:
-            warnings.warn(f'Warning: No key for {e}')
+            warnings.warn(f'No key for {e}')
             return 0
         except ValueError as e:
             return None
