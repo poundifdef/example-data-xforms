@@ -68,6 +68,12 @@ def total_column_sum_new(ds, new_col):
     return rc
 
 
+def markdown_link_new(ds, new_col, link, title):
+    rc = ds
+    rc[new_col] = f"[{ds[title]}]({ds[link]})"
+    return rc
+
+
 def aggregation_new(ds, new_col, source, operation):
     if operation != "sum":
         raise Exception(f"Aggregating with {operation} is not supported")
@@ -508,11 +514,12 @@ def _join(join_type, datasets, join_on_first_n_columns):
 
     return rc
 
+
 def _column_types_match(datasets, first_n_columns):
     # TODO: handle more than 2 datasets
     if len(datasets) > 2:
         return True
-    
+
     d1 = datasets[0]
     d2 = datasets[1]
     for n in range(first_n_columns):
@@ -520,8 +527,9 @@ def _column_types_match(datasets, first_n_columns):
         c2 = d2.columns[n]
         if d1.dtypes[c1] != d2.dtypes[c2]:
             return False
-    
+
     return True
+
 
 def full_outer_join(datasets, join_on_first_n_columns):
     return _join("outer", datasets, join_on_first_n_columns)
