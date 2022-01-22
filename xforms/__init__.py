@@ -622,7 +622,15 @@ def line(ds):
     is the x axis. Any subsequent columns are new datasets.
     """
 
-    fig = px.line(ds, x=ds.columns[0], y=ds.columns[1:])
+    # Does not work consistently with multiple lines
+    # fig = px.line(ds, x=ds.columns[0], y=ds.columns[1:])
+
+    fig = go.Figure()
+    for col in ds.columns[1:]:
+        fig.add_trace(
+            go.Scatter(x=ds[ds.columns[0]], y=ds[col], mode="lines", name=col)
+        )
+
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
     fig.update_yaxes(rangemode="tozero")
     fig.show()
