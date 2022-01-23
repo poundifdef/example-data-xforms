@@ -416,7 +416,7 @@ def filter(ds, filters, match_type="all", mode="include"):
             continue
 
         if operator == "IS NOT NULL":
-            comparisons.append(ds[column] is not None)
+            comparisons.append(ds[column].notnull())
             continue
 
         fn = {
