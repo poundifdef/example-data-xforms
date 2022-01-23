@@ -36,7 +36,10 @@ number_formatter = FuncFormatter(format)
 
 def transpose(ds):
     new_index = ds.columns[0]
-    rc = ds.set_index(new_index).transpose().reindex()
+    rc = ds.set_index(new_index).transpose()
+    rc.reset_index(level=0, inplace=True)
+    rc.rename(columns={"index": rc.columns.name}, inplace=True)
+    rc.columns.name = ""
     return rc
 
 
