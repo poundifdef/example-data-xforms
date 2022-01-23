@@ -651,7 +651,7 @@ def line(ds):
     # Does not work consistently with multiple lines
     # fig = px.line(ds, x=ds.columns[0], y=ds.columns[1:])
 
-    ds = sort(ds, [{"col_name": ds.columns[0], "direction": 1}])
+    # ds = sort(ds, [{"col_name": ds.columns[0], "direction": 1}])
 
     fig = go.Figure()
     for col in ds.columns[1:]:
