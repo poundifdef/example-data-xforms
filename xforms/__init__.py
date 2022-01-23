@@ -522,6 +522,8 @@ def pivot(ds, aggregations):
 
 def _join(join_type, datasets, join_on_first_n_columns):
     rc = datasets[0]
+    
+    ordered_cols = rc.columns[:join_on_first_n_columns]
 
     for i in range(1, len(datasets)):
         left_data = rc
@@ -540,6 +542,9 @@ def _join(join_type, datasets, join_on_first_n_columns):
             right_on=list(right_data_renamed.columns[:join_on_first_n_columns]),
             suffixes=(None, ":1"),
         )
+        
+        # reorder columns
+        rc = reorder_columns(rc, ordered_cols)
     
     # sort first n columns
     columns = []
