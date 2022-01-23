@@ -511,7 +511,7 @@ def pivot(ds, aggregations):
         cols = []
         for col in rc.columns.values:
             key = col[1]
-            if key.is_integer():
+            if isinstance(key, float) and key.is_integer():
                 key = int(key)
             cols.append(f"{key}:{col[0]}")
         rc.columns = cols
