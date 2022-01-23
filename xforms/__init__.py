@@ -508,7 +508,13 @@ def pivot(ds, aggregations):
         rc = rc.reindex(
             columns=rc.columns.reindex(ordered_cols, level=rc.index.nlevels - 1)[0]
         )
-        rc.columns = [f"{col[1]}:{col[0]}" for col in rc.columns.values]
+        cols = []
+        for col in rc.columns.values:
+            key = col[1]
+            if key.is_integer():
+                key = int(key)
+            cols.append(f"{key}:{col[0]}")
+        rc.columns = cols
         rc = rc.fillna(0)
         rc.reset_index(level=0, inplace=True)
         rc.columns.name = ""
