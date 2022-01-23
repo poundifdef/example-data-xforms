@@ -52,7 +52,11 @@ def subtract_new(ds, new_col, minuend, subtrahend):
 
 def multiply_new(ds, new_col, multiplicand_1, multiplicand_2):
     rc = ds
-    rc[new_col] = ds[multiplicand_1] * ds[multiplicand_2]
+    if type(multiplicand_1) == str:
+        multiplicand_1 = ds[multiplicand_1]
+    if type(multiplicand_2) == str:
+        multiplicand_2 = ds[multiplicand_2]
+    rc[new_col] = multiplicand_1 * multiplicand_2
     return rc
 
 
