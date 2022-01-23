@@ -354,7 +354,12 @@ def group_by(ds, columns):
             continue
         agg[name] = method
 
-    rc = ds.groupby(grouped_cols, as_index=False).agg(agg)
+    rc = ds
+    if grouped_cols:
+      rc = ds.groupby(grouped_cols, as_index=False)
+    rc = rc.agg(agg)
+    if type(rc) == pd.Series:
+      rc = rc.to_frame().transpose()
     rc = rc[ordered]
     rc.rename(columns=rename, inplace=True)
 
