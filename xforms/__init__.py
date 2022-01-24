@@ -619,6 +619,8 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
     # Here is a tool to help test formats:
     # http://bl.ocks.org/zanarmstrong/05c1e95bf7aa16c4768e
 
+    return ds
+
     column_types = column_types or {}
     column_precision = column_precision or {}
     formats = []
@@ -659,9 +661,7 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
     # leave margin for scroll bar
     fig.update_layout(margin=dict(r=25, l=10, t=0, b=0))
 
-    # FIXME
-    # fig.show()
-    return ''
+    fig.show()
 
 
 def line(ds):
