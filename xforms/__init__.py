@@ -646,7 +646,7 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
     # ensure nulls render as empty
     ds.fillna("", inplace=True)
 
-    ds = ds.applymap(lambda c: html.escape(c) if isinstance(c, str) else c)
+    ds = ds.applymap(lambda c: html.escape(c, quote=False) if isinstance(c, str) else c)
 
     # TODO: https://dash.plotly.com/datatable/width#horizontal-scroll
     fig = go.Figure(
