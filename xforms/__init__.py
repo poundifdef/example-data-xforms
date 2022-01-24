@@ -658,7 +658,10 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
     )
     # leave margin for scroll bar
     fig.update_layout(margin=dict(r=25, l=10, t=0, b=0))
-    fig.show()
+
+    # FIXME
+    # fig.show()
+    return ''
 
 
 def line(ds):
