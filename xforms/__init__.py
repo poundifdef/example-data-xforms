@@ -1,3 +1,4 @@
+import html
 import numpy as np
 import pandas as pd
 import warnings
@@ -619,8 +620,6 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
     # Here is a tool to help test formats:
     # http://bl.ocks.org/zanarmstrong/05c1e95bf7aa16c4768e
 
-    return ds
-
     column_types = column_types or {}
     column_precision = column_precision or {}
     formats = []
@@ -646,6 +645,8 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
 
     # ensure nulls render as empty
     ds.fillna("", inplace=True)
+
+    ds = ds.applymap(lambda c: html.escape(c) if isinstance(c, str) else c)
 
     # TODO: https://dash.plotly.com/datatable/width#horizontal-scroll
     fig = go.Figure(
