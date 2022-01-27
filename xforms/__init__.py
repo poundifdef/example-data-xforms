@@ -135,6 +135,7 @@ def datediff_new(ds, new_col, start, end, increment):
 
 def substr_new(ds, new_col, source, start=None, end=None):
     rc = ds
+    rc[source] = ds[source].apply(str)
     rc[new_col] = ds[source].str[start:end]
     return rc
 
