@@ -660,7 +660,7 @@ def wide_table(ds, column_types: dict = None, column_precision: dict = None):
             precision = precision or 2
             formatters[col_name] = lambda x: f"{{:,.{precision}f}}".format(x)
         else:
-            formatters[col_name] = lambda x: x
+            formatters[col_name] = lambda x: str(x)
 
     rc = ds.to_html(
         escape=True, notebook=True, index=False, justify="left", formatters=formatters
