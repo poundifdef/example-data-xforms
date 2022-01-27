@@ -76,7 +76,7 @@ def divide_new(ds, new_col, dividend, divisor):
     if dividend in ds.columns and divisor in ds.columns:
         rc[new_col] = ds[dividend] / ds[divisor]
     else:
-        rc[new_col] = pd.Series(dtype='float')
+        rc[new_col] = pd.Series(dtype="float")
     return rc
 
 
@@ -630,7 +630,41 @@ def inner_join(datasets, join_on_first_n_columns):
 def left_join(datasets, join_on_first_n_columns, sort_after_join=True):
     if not _column_types_match(datasets, join_on_first_n_columns):
         return datasets[0]
-    return _join("left", datasets, join_on_first_n_columns, sort_after_join=sort_after_join)
+    return _join(
+        "left", datasets, join_on_first_n_columns, sort_after_join=sort_after_join
+    )
+
+
+def wide_table(ds, column_types: dict = None, column_precision: dict = None):
+    """
+    Used to display a table of data. This is identical to table(), but
+    the table isn't quite as aesthetic. This helps if the table is particularly
+    wide since Plotly's tables squish the columns too much to be legible.
+    """
+
+    formatters = {}
+    for col_name in ds.columns:
+        col_type = column_types.get(col_name)
+        precision = column_precision.get(col_name)
+
+        if col_type == "percentage":
+            precision = precision or 0
+            formatters[col_name] = lambda x: f"{{:.{precision}%}}".format(x)
+        elif col_type == "integer":
+            formatters[col_name] = lambda x: f"{{:,}}".format(x)
+        elif col_type == "currency":
+            precision = precision or 2
+            formatters[col_name] = lambda x: f"${{:,.{precision}f}}".format(x)
+        elif col_type == "real":
+            precision = precision or 2
+            formatters[col_name] = lambda x: f"{{:,.{precision}f}}".format(x)
+        else:
+            formatters[col_name] = None
+
+    rc = ds.to_html(
+        escape=True, notebook=True, index=False, justify="left", formatters=formatters
+    )
+    display(HTML(rc))
 
 
 def table(ds, column_types: dict = None, column_precision: dict = None):
@@ -675,7 +709,7 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
         elif col_type == "real":
             precision = precision or 2
             formats.append(f",.{precision}f")
-        #elif col_type == "date":
+        # elif col_type == "date":
         #    ds[col_name] = pd.to_datetime(ds[col_name], format="%b %d, %Y")
         #    formats.append(None)
         else:
