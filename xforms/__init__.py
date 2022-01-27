@@ -419,10 +419,9 @@ def histogram_buckets(ds, col, aggregation, bucket_type, custom_buckets):
     binned = pd.cut(ds[col], bins=bins)
     binned = binned.cat.rename_categories(lambda r: f"{r.left}-{r.right - 1}")
     rc = binned.groupby(binned).size().to_frame().rename_axis(0).reset_index()
-    columns = {}
-    columns[col] = "Bucket"
-    columns[0] = "Count"
-    rc.rename(columns, inplace=True)
+    rc.reset_index(inplace=True)
+    rc.drop(columns=['index'], inplace=True)
+    rc.rename(columns={0: "Bucket", rc.columns[1]: "Count"}, inplace=True)
     return rc
 
 
