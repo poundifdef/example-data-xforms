@@ -261,9 +261,7 @@ def sqlite(ds, col, query):
     rc = sqlite_new(ds, temp_column, query)
     rc[col] = rc[temp_column]
 
-    remove_columns(ds, [temp_column])
-
-    return rc
+    return remove_columns(rc, [temp_column])
 
 
 def combine_columns(
