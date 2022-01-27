@@ -145,7 +145,7 @@ def custom_new(ds, new_col, function):
     return rc
 
 
-def sqlite_new(ds, new_col, query):
+def sqlite_new(ds, new_col, query, column_types=None):
     """
     Executes 'query' against the data as a sqlite database
     and returns the result as a new column
@@ -253,12 +253,12 @@ def custom(ds, col, function):
     return custom_new(ds, col, adapter(function))
 
 
-def sqlite(ds, col, query):
+def sqlite(ds, col, query, column_types=None):
     # Perform the computation as a new temporary column,
     # then replace the old column with the new data
     temp_column = "hotswap_temp"
 
-    rc = sqlite_new(ds, temp_column, query)
+    rc = sqlite_new(ds, temp_column, query, column_types=column_types)
     rc[col] = rc[temp_column]
 
     return remove_columns(rc, [temp_column])
@@ -560,7 +560,7 @@ def pivot(ds, aggregations):
     return rc
 
 
-def _join(join_type, datasets, join_on_first_n_columns):
+def _join(join_type, datasets, join_on_first_n_columns, sort_after_join=True):
     rc = datasets[0]
 
     ordered_cols = rc.columns[:join_on_first_n_columns]
@@ -586,11 +586,12 @@ def _join(join_type, datasets, join_on_first_n_columns):
         # reorder columns
         rc = reorder_columns(rc, ordered_cols)
 
-    # sort first n columns
-    columns = []
-    for n in range(join_on_first_n_columns):
-        columns.append({"col_name": rc.columns[n], "direction": 1})
-    rc = sort(rc, columns)
+    if sort_after_join:
+        # sort first n columns
+        columns = []
+        for n in range(join_on_first_n_columns):
+            columns.append({"col_name": rc.columns[n], "direction": 1})
+        rc = sort(rc, columns)
 
     return rc
 
@@ -619,10 +620,10 @@ def inner_join(datasets, join_on_first_n_columns):
     return _join("inner", datasets, join_on_first_n_columns)
 
 
-def left_join(datasets, join_on_first_n_columns):
+def left_join(datasets, join_on_first_n_columns, sort_after_join=True):
     if not _column_types_match(datasets, join_on_first_n_columns):
         return datasets[0]
-    return _join("left", datasets, join_on_first_n_columns)
+    return _join("left", datasets, join_on_first_n_columns, sort_after_join=sort_after_join)
 
 
 def table(ds, column_types: dict = None, column_precision: dict = None):
