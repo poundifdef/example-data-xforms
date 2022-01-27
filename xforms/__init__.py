@@ -422,6 +422,7 @@ def histogram_buckets(ds, col, aggregation, bucket_type, custom_buckets):
     rc.reset_index(inplace=True)
     rc.drop(columns=['index'], inplace=True)
     rc.rename(columns={0: "Bucket", rc.columns[1]: "Count"}, inplace=True)
+    rc['Bucket'] = rc['Bucket'].astype("string")
     return rc
 
 
@@ -759,7 +760,7 @@ def line(ds):
     fig.show()
 
 
-def bar(ds, stacked=False):
+def bar(ds, stacked=False, xaxis_type=None):
     """
     Generate a bar chart from dataset. Assumes first column
     is the x axis. Any subsequent columns are new datasets.
@@ -774,6 +775,8 @@ def bar(ds, stacked=False):
 
     fig = px.bar(ds, x=ds.columns[0], y=ds.columns[1:], barmode=barmode)
     fig.update_layout(margin=dict(r=10, l=10, t=0, b=0))
+    if xaxis_type:
+      fig.update_layout(xaxis={'type': xaxis_type})
     fig.show()
 
 
