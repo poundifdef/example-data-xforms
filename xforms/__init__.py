@@ -73,7 +73,10 @@ def add_new(ds, new_col, addend_1, addend_2):
 
 def divide_new(ds, new_col, dividend, divisor):
     rc = ds
-    rc[new_col] = ds[dividend] / ds[divisor]
+    if dividend in ds.columns and divisor in ds.columns:
+        rc[new_col] = ds[dividend] / ds[divisor]
+    else:
+        rc[new_col] = pd.Series(dtype='float')
     return rc
 
 
