@@ -152,7 +152,7 @@ def sqlite_new(ds, new_col, query):
     """
 
     # Import data into an in-memory sqlite instance
-    with sqlite3.connect(":memory") as conn:
+    with sqlite3.connect(":memory:") as conn:
         table_name = "ds"
         ds.to_sql(name=table_name, con=conn)
 
