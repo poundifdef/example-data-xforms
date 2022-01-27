@@ -308,7 +308,7 @@ def zero_fill(ds, column_types):
     col_1_name = ds.columns[0]
     col_1_type = column_types[col_1_name]
 
-    if col_1_type in ("text", "real"):
+    if col_1_type in ("text", "real", "integer"):
         # Do nothing for this zero_fill since the
         # first column is a string or real number
         pass
