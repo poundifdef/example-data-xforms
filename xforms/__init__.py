@@ -668,6 +668,8 @@ def table(ds, column_types: dict = None, column_precision: dict = None):
         elif col_type == "real":
             precision = precision or 2
             formats.append(f",.{precision}f")
+        elif col_type == "date":
+            ds[col_name] = pd.to_datetime(ds[col_name], format="%b %d, %Y")
         else:
             formats.append(None)
 
