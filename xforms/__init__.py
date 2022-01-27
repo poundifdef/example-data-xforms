@@ -398,7 +398,7 @@ def group_by(ds, columns):
 
     rc = ds
     if grouped_cols:
-        rc = ds.groupby(grouped_cols, as_index=False)
+        rc = ds.groupby(grouped_cols, as_index=False, dropna=False)
     rc = rc.agg(agg)
     if type(rc) == pd.Series:
         rc = rc.to_frame().transpose()
