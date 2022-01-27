@@ -8,6 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import sqlite3
+from IPython.core.display import display, HTML
 
 
 def adapter(fn):
