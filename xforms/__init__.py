@@ -157,7 +157,7 @@ def sqlite_new(ds, new_col, query):
         ds.to_sql(name=table_name, con=conn, index=False)
 
         # Run new SQL query and add custom code as new column
-        sql = f"SELECT *, {query} as {new_col} from {table_name}"
+        sql = f"SELECT *, {query} as '{new_col}' from {table_name}"
         rc = pd.read_sql(sql, conn)
 
     return rc
