@@ -7,6 +7,7 @@ from matplotlib.ticker import FuncFormatter
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import sqlite3
 
 
 def adapter(fn):
@@ -14,7 +15,7 @@ def adapter(fn):
         try:
             return fn(row)
         except KeyError as e:
-            warnings.warn(f'No key for {e}')
+            warnings.warn(f"No key for {e}")
             return 0
         except ValueError as e:
             return None
@@ -144,6 +145,24 @@ def custom_new(ds, new_col, function):
     return rc
 
 
+def sqlite_new(ds, new_col, query):
+    """
+    Executes 'query' against the data as a sqlite database
+    and returns the result as a new column
+    """
+
+    # Import data into an in-memory sqlite instance
+    with sqlite3.connect(":memory") as conn:
+        table_name = "ds"
+        ds.to_sql(name=table_name, con=conn)
+
+        # Run new SQL query and add custom code as new column
+        sql = f"SELECT *, f{query} as {new_col} from {table_name}"
+        rc = pd.read_sql(sql, conn)
+
+    return rc
+
+
 def case_statement_new(
     ds, new_col, source, conditions, default, default_type="LITERAL"
 ):
@@ -232,6 +251,19 @@ def format(ds, col, arg):
 
 def custom(ds, col, function):
     return custom_new(ds, col, adapter(function))
+
+
+def sqlite(ds, col, query):
+    # Perform the computation as a new temporary column,
+    # then replace the old column with the new data
+    temp_column = "hotswap_temp"
+
+    rc = sqlite_new(ds, temp_column, query)
+    rc[col] = rc[temp_column]
+
+    remove_columns(ds, [temp_column])
+
+    return rc
 
 
 def combine_columns(
@@ -360,10 +392,10 @@ def group_by(ds, columns):
 
     rc = ds
     if grouped_cols:
-      rc = ds.groupby(grouped_cols, as_index=False)
+        rc = ds.groupby(grouped_cols, as_index=False)
     rc = rc.agg(agg)
     if type(rc) == pd.Series:
-      rc = rc.to_frame().transpose()
+        rc = rc.to_frame().transpose()
     rc = rc[ordered]
     rc.rename(columns=rename, inplace=True)
 
@@ -409,13 +441,13 @@ def filter(ds, filters, match_type="all", mode="include"):
         if operand_type == "COLUMN":
             operand = ds[operand]
         else:
-            if operator and operator[0] in ('<', '>'):
+            if operator and operator[0] in ("<", ">"):
                 # attempt to coerce the operand to a number
                 try:
                     operand = float(operand)
                 except:
                     pass
-                
+
             if operator == "IN":
                 comparisons.append(ds[column].isin(operand))
                 continue
@@ -532,7 +564,7 @@ def pivot(ds, aggregations):
 
 def _join(join_type, datasets, join_on_first_n_columns):
     rc = datasets[0]
-    
+
     ordered_cols = rc.columns[:join_on_first_n_columns]
 
     for i in range(1, len(datasets)):
@@ -552,17 +584,14 @@ def _join(join_type, datasets, join_on_first_n_columns):
             right_on=list(right_data_renamed.columns[:join_on_first_n_columns]),
             suffixes=(None, ":1"),
         )
-        
+
         # reorder columns
         rc = reorder_columns(rc, ordered_cols)
-    
+
     # sort first n columns
     columns = []
     for n in range(join_on_first_n_columns):
-        columns.append({
-            "col_name": rc.columns[n],
-            "direction": 1
-        })
+        columns.append({"col_name": rc.columns[n], "direction": 1})
     rc = sort(rc, columns)
 
     return rc
