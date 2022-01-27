@@ -414,13 +414,35 @@ def histogram_buckets(ds, col, aggregation, bucket_type, custom_buckets):
 
     if bucket_type != "custom_buckets":
         raise Exception("We only support custom_buckets in histograms")
+    
+    # add the maximum value to the end of the buckets
+    max_value = ds[col].max()
+    custom_buckets.append(max_value)
 
-    bins = pd.IntervalIndex.from_breaks(custom_buckets)
+    bins = pd.IntervalIndex.from_breaks(custom_buckets, closed='left')
+    
     binned = pd.cut(ds[col], bins=bins)
-    binned = binned.cat.rename_categories(lambda r: f"{r.left}-{r.right - 1}")
-    rc = binned.groupby(binned).size().to_frame().rename_axis(0).reset_index()
+    
+    # rename the buckets appropriately
+    categories = {}
+    for bin in bins:
+      categories[bin] = f"{bin.left}-{bin.right - 1}"
+    last = bins[-1]
+    categories[last] = f"{last.left}-{last.right}"
+    binned = binned.cat.rename_categories(categories)
+    
+    rc = binned.groupby(binned).size()
+    
+    # add the values before the bins
+    before = len(ds[ds[col] < custom_buckets[0]])
+    rc[0] += before
+    
+    # add the maximum values
+    max_count = len(ds[ds[col] == max_value])
+    rc[-1] += max_count
+    
+    rc = rc.to_frame().rename_axis(0)
     rc.reset_index(inplace=True)
-    rc.drop(columns=['index'], inplace=True)
     rc.rename(columns={0: "Bucket", rc.columns[1]: "Count"}, inplace=True)
     rc['Bucket'] = rc['Bucket'].astype("string")
     return rc
