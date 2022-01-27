@@ -650,7 +650,7 @@ def wide_table(ds, column_types: dict = None, column_precision: dict = None):
 
         if col_type == "percentage":
             precision = precision or 0
-            formatters[col_name] = lambda x: f"{{:.{precision}%}}".format(x)
+            formatters[col_name] = lambda x: f"{{:,.{precision}%}}".format(x)
         elif col_type == "integer":
             formatters[col_name] = lambda x: f"{{:,}}".format(x)
         elif col_type == "currency":
@@ -660,7 +660,7 @@ def wide_table(ds, column_types: dict = None, column_precision: dict = None):
             precision = precision or 2
             formatters[col_name] = lambda x: f"{{:,.{precision}f}}".format(x)
         else:
-            formatters[col_name] = None
+            formatters[col_name] = lambda x: x
 
     rc = ds.to_html(
         escape=True, notebook=True, index=False, justify="left", formatters=formatters
