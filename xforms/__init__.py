@@ -276,6 +276,9 @@ def combine_columns(
         rc[new_col] = rc[columns].agg(separator.join, axis=1)
 
     elif operator in ("add", "subtract", "multiply"):
+        for col in columns:
+            rc[col] = rc[col].astype(float)
+
         cols = [ds[col] for col in columns]
         rc[new_col] = cols[0]
         for col in cols[1:]:
