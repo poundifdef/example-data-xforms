@@ -139,8 +139,18 @@ def datediff_new(ds, new_col, start, end, increment):
 
 def substr_new(ds, new_col, source, start=None, end=None):
     rc = ds
-    rc[source] = ds[source].apply(str)
-    rc[new_col] = ds[source].str[start:end]
+
+    if start is None:
+        start = 0
+    else:
+        start = start - 1
+
+    if end is not None:
+        end = start + end
+
+
+    converted = rc[source].apply(lambda x: str(x) if x else '')
+    rc[new_col] = converted.str[start:end]
     return rc
 
 
