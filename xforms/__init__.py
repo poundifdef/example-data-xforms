@@ -585,7 +585,8 @@ def pivot(ds, aggregations):
 
     # Sort values based on original order, rather than re-ordering
     # which is what pivot_table() does by default.
-    rc.sort_values(ds.columns[0], key=sort_column, inplace=True, ignore_index=True)
+    if len(rc):
+        rc.sort_values(ds.columns[0], key=sort_column, inplace=True, ignore_index=True)
 
     return rc
 
