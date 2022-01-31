@@ -377,6 +377,12 @@ def group_by(ds, columns):
 
     agg = {}
     rename = {}
+    
+    def to_numeric(name):
+        try:
+            ds[name] = pd.to_numeric(ds[name])
+        except:
+            pass
 
     for name, action in columns.items():
         if name not in ds.columns:
@@ -389,16 +395,22 @@ def group_by(ds, columns):
 
         if action == "MIN":
             method = "min"
+            to_numeric(name)
         elif action == "MAX":
             method = "max"
+            to_numeric(name)
         elif action == "MEDIAN":
             method = "median"
+            to_numeric(name)
         elif action == "AVG":
             method = "mean"
+            to_numeric(name)
         elif action == "COUNT":
             method = "count"
+            to_numeric(name)
         elif action == "SUM":
             method = "sum"
+            to_numeric(name)
         elif action == "COUNT_DISTINCT":
             method = "nunique"
         elif action == "GROUP_CONCAT":
